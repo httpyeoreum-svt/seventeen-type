@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'">
 <title>SEVENTEEN 相性診断 / 궁합 진단</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,7 +45,9 @@
     padding:34px 30px 30px; position:relative;
   }
   .card.intro{display:flex; flex-direction:column; min-height:calc(100vh - 150px)}
-  .card.intro .btn{margin-top:auto}
+  .card.intro .note{margin-top:auto}
+  .card.intro .btn{margin-top:14px}
+  .note{font-size:11px; color:#9a9488; line-height:1.75; margin:0}
   .card.result{display:flex; flex-direction:column; min-height:calc(100vh - 150px)}
   .card.result .btn.ghost{margin-top:auto}
 
@@ -78,34 +81,37 @@
     padding:14px 16px; font-size:14.5px; line-height:1.5; font-weight:600; cursor:pointer;
     transition:transform .1s, box-shadow .1s, background .1s, color .1s; box-shadow:3px 3px 0 rgba(28,27,24,.13);
   }
-  .opt:hover{background:var(--accent); color:#fff; box-shadow:4px 4px 0 var(--ink); transform:translate(-1px,-1px)}
+  .opt:active{background:var(--accent); color:#fff; box-shadow:4px 4px 0 var(--ink); transform:translate(-1px,-1px)}
+  @media (hover:hover){ .opt:hover{background:var(--accent); color:#fff; box-shadow:4px 4px 0 var(--ink); transform:translate(-1px,-1px)} }
 
   .imgopts{display:grid; grid-template-columns:1fr 1fr; gap:12px}
   .imgopt{border:1.5px solid var(--ink); background:var(--card); padding:10px; cursor:pointer;
     display:flex; flex-direction:column; gap:9px; align-items:center; text-align:center;
     transition:transform .1s, box-shadow .1s; box-shadow:3px 3px 0 rgba(28,27,24,.13)}
-  .imgopt:hover{transform:translate(-1px,-1px); box-shadow:5px 5px 0 var(--ink)}
+  .imgopt:active{transform:translate(-1px,-1px); box-shadow:5px 5px 0 var(--ink)}
+  @media (hover:hover){ .imgopt:hover{transform:translate(-1px,-1px); box-shadow:5px 5px 0 var(--ink)} }
   .imgopt img{width:100%; aspect-ratio:1/1; object-fit:cover; border:1.5px solid var(--ink); display:block; background:#eae4d6}
   .imgopt span{font-size:12.5px; font-weight:700; line-height:1.45; color:var(--ink)}
 
+  .rmatch{text-align:center; font-size:11px; font-weight:800; letter-spacing:.2em; color:var(--accent); text-transform:uppercase; margin-bottom:14px}
   .rface{
     position:relative; overflow:hidden;
-    width:96px; height:96px; border:1.5px solid var(--ink); box-shadow:5px 5px 0 var(--ink); margin:2px auto 18px;
+    width:96px; height:96px; border:1.5px solid var(--ink); box-shadow:5px 5px 0 var(--ink); margin:0 auto 14px;
     display:flex; align-items:center; justify-content:center;
     font-size:30px; font-weight:800; color:#fff; letter-spacing:.02em;
   }
   .rface img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
-  .rmatch{text-align:center; font-size:11px; font-weight:800; letter-spacing:.2em; color:var(--accent); text-transform:uppercase}
-  .rname{text-align:center; font-size:29px; font-weight:800; letter-spacing:-.01em; margin:7px 0 3px}
+  .rpct{text-align:center; font-size:22px; font-weight:800; color:var(--accent); letter-spacing:.01em; margin:0 0 2px}
+  .rname{text-align:center; font-size:29px; font-weight:800; letter-spacing:-.01em; margin:2px 0 4px}
   .rtitle{text-align:center; font-size:14.5px; font-weight:800; color:var(--ink); margin-bottom:20px}
-  .rpct{display:none}
-  .rdesc{font-size:14px; line-height:1.95; color:#37342c; background:#f4eee1; border:1.5px solid var(--ink); padding:18px; margin-bottom:22px}
+  .rdesc{font-size:14px; line-height:1.9; color:#37342c; background:#f4eee1; border:1.5px solid var(--ink); padding:13px 15px; margin-bottom:22px}
 
-  .subhead{font-size:11px; font-weight:800; letter-spacing:.18em; color:var(--ink); text-transform:uppercase; margin:6px 0 14px; text-align:center}
+  .subhead{display:flex; align-items:center; gap:12px; font-size:11px; font-weight:800; letter-spacing:.18em; color:var(--ink); text-transform:uppercase; margin:6px 0 14px}
+  .subhead::before, .subhead::after{content:""; flex:1; height:1.5px; background:var(--ink)}
   .rank{margin:6px 0 20px}
-  .rankrow{display:grid; grid-template-columns:22px 76px 1fr 40px; align-items:center; gap:9px; margin-bottom:8px}
+  .rankrow{display:grid; grid-template-columns:22px 96px 1fr 40px; align-items:center; gap:9px; margin-bottom:8px}
   .rankrow .rk{font-size:12px; font-weight:800; color:#bcb3a1; text-align:center}
-  .rankrow .rn{font-size:12.5px; font-weight:800; color:var(--ink)}
+  .rankrow .rn{font-size:12.5px; font-weight:800; color:var(--ink); white-space:nowrap}
   .rankrow .rb{height:13px; background:var(--track); border:1.5px solid var(--ink); overflow:hidden}
   .rankrow .rb i{display:block; height:100%}
   .rankrow .rp{font-size:12px; font-weight:800; color:var(--ink-soft); text-align:right}
@@ -118,7 +124,7 @@
     h1{font-size:25px}
     .qtext{font-size:18px}
     .rname{font-size:27px}
-    .rankrow{grid-template-columns:20px 60px 1fr 34px; gap:7px}
+    .rankrow{grid-template-columns:18px 84px 1fr 30px; gap:7px}
   }
 </style>
 </head>
@@ -345,11 +351,12 @@ const T = {
   ja:{
     kicker:"SEVENTEEN 相性診断",
     h1a:"あなたに一番似ている", h1g:"SEVENTEENメンバー", h1b:"は？",
-    lead:"いくつかの質問に答えるだけでOK。<br>あなたの選択の傾向が一番近いメンバーを診断します。<br><small>※GOING SEVENTEEN『너 자신을 알라』#1＆#2 の内容を元に作成しました。<br>※本診断の結果は娯楽を目的としたもので、医学的・心理学的な診断を意図したものではありません。</small>",
+    lead:"いくつかの質問に答えるだけでOK。<br>あなたの選択の傾向が一番近いメンバーを診断します。",
+    note:"※GOING SEVENTEEN『너 자신을 알라』#1＆#2 の内容を元に作成しました。<br>※本診断の結果は娯楽を目的としたもので、医学的・心理学的な診断を意図したものではありません。",
     tags:["メンバー投票制","相性ランキング付き","日本語／한국어"],
     start:"診断をはじめる",
     q:"問", of:"／", back:"前の質問へ",
-    resultMatch:"BEST MATCH",
+    resultMatch:"＜BEST MATCH＞",
     rankHead:"似ているメンバー",
     retry:"もう一度診断する",
     share:"結果はスクショで共有できます",
@@ -359,11 +366,12 @@ const T = {
   ko:{
     kicker:"SEVENTEEN 궁합 진단",
     h1a:"당신과 가장 닮은", h1g:"세븐틴 멤버", h1b:"는?",
-    lead:"몇 가지 질문에 답하면 끝!<br>당신의 선택 성향이 가장 가까운 멤버를 진단합니다.<br><small>※고잉 세븐틴 『너 자신을 알라』 #1＆#2 내용을 바탕으로 제작했습니다.<br>※본 진단 결과는 오락을 목적으로 하며, 의학적·심리학적 진단을 의도한 것이 아닙니다.</small>",
+    lead:"몇 가지 질문에 답하면 끝!<br>당신의 선택 성향이 가장 가까운 멤버를 진단합니다.",
+    note:"※고잉 세븐틴 『너 자신을 알라』 #1＆#2 내용을 바탕으로 제작했습니다.<br>※본 진단 결과는 오락을 목적으로 하며, 의학적·심리학적 진단을 의도한 것이 아닙니다.",
     tags:["멤버 투표제","궁합 랭킹 포함","日本語／한국어"],
     start:"진단 시작하기",
     q:"문항", of:"／", back:"이전 질문으로",
-    resultMatch:"BEST MATCH",
+    resultMatch:"＜BEST MATCH＞",
     rankHead:"닮은 멤버",
     retry:"다시 진단하기",
     share:"결과는 캡처해서 공유할 수 있어요",
@@ -451,6 +459,7 @@ function renderIntro(t){
   card.innerHTML=`
     <h1>${t.h1a}<br><span class="g">${t.h1g}</span>${t.h1b}</h1>
     <p class="lead">${t.lead}</p>
+    <p class="note">${t.note}</p>
     <button class="btn" onclick="startQuiz()">${t.start}</button>
   `;
 }
@@ -490,11 +499,11 @@ function renderResult(t){
   }).join("");
 
   card.innerHTML=`
+    <div class="rmatch">${t.resultMatch}</div>
     <div class="rface" style="background:${top.m.color}">${top.m.init}<img src="${encodeURI(top.m.id)}.jpg" alt="" onerror="this.remove()"></div>
-    <div class="rmatch">${t.resultMatch} · ${top.pct}%</div>
+    <div class="rpct">${top.pct}%</div>
     <div class="rname">${top.m.name}</div>
     <div class="rtitle">${top.m.title[lang]}</div>
-    <div class="rpct"></div>
     <div class="rdesc">${top.m.desc[lang]}</div>
     <div class="subhead">${t.rankHead}</div>
     <div class="rank">${rankHtml}</div>
