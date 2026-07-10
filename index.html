@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://abacus.jasoncameron.dev; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'">
 <title>SEVENTEEN 相性診断 / 궁합 진단</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,7 +50,8 @@
   .card.intro .btn{margin-top:14px}
   .note{font-size:11px; color:#9a9488; line-height:1.75; margin:0}
   .card.result{display:flex; flex-direction:column; min-height:calc(100vh - 150px)}
-  .card.result .btn.ghost{margin-top:auto}
+  .card.result .rshare{margin-top:auto}
+  .card.result .btn.ghost{margin-top:10px}
 
   .kicker{font-size:12px; letter-spacing:.24em; font-weight:800; color:var(--accent); text-transform:uppercase}
   h1{font-size:27px; line-height:1.45; margin:2px 0 6px; font-weight:700; letter-spacing:-.01em}
@@ -106,6 +107,9 @@
   .rname{text-align:center; font-size:29px; font-weight:800; letter-spacing:-.01em; margin:2px 0 4px}
   .rtitle{text-align:center; font-size:13px; font-weight:800; color:var(--ink); margin-bottom:20px}
   .rdesc{font-size:13px; line-height:1.9; color:#37342c; background:#f4eee1; border:1.5px solid var(--ink); padding:13px 15px; margin-bottom:22px}
+  .rhit{text-align:center; font-size:12px; font-weight:800; color:var(--accent); border:1.5px solid var(--accent); padding:6px 10px; margin:2px 0 18px}
+  .rshare{text-align:center; font-size:12.5px; font-weight:800; color:var(--accent); cursor:pointer; padding:8px; user-select:none; text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1.5px}
+  .rshare.done{color:var(--ink-soft); text-decoration:none}
 
   .axleg{display:flex; justify-content:center; align-items:center; gap:6px; font-size:10.5px; font-weight:800; color:var(--ink-soft); margin-bottom:14px}
   .axleg .sw{display:inline-block}
@@ -423,8 +427,10 @@ const T = {
     resultMatch:"＜BEST MATCH＞",
     rankHead:"似ているメンバー",
     styleHead:"タイプ傾向", you:"あなた",
+    hit:function(name,n){ return name+"と90%以上一致したのは あなたで "+n+"人目！"; },
+    copied:"URLをコピーしました！",
     retry:"もう一度診断する",
-    share:"結果はスクショで共有できます",
+    share:"友達にシェアする（タップでURLコピー）",
     foot:"",
     similar:"番組では",
   },
@@ -439,8 +445,10 @@ const T = {
     resultMatch:"＜BEST MATCH＞",
     rankHead:"닮은 멤버",
     styleHead:"성향", you:"나",
+    hit:function(name,n){ return name+"님과 90% 이상 일치한 건 당신이 "+n+"번째!"; },
+    copied:"URL을 복사했어요!",
     retry:"다시 진단하기",
-    share:"결과는 캡처해서 공유할 수 있어요",
+    share:"친구에게 공유하기 (탭하면 URL 복사)",
     foot:"",
     similar:"방송에서는",
   }
@@ -451,6 +459,8 @@ let lang = "ja";
 let step = -1;            // -1 intro, 0..n-1 questions, n result
 let votes = {};
 let history = [];         // 回答した選択肢を順に記録（戻る用）
+let hitState = null;      // {id,n} 90%以上カウンターの取得結果
+let hitBusy = false;
 const card = document.getElementById("card");
 const foot = document.getElementById("foot");
 
@@ -463,7 +473,28 @@ function setLang(l){
   render();
 }
 
-function startQuiz(){ resetScores(); step=0; render(); }
+function startQuiz(){ resetScores(); hitState=null; hitBusy=false; step=0; render(); }
+
+// 90%以上一致カウンター（無料カウンターAPI: abacus）
+function fetchHit(id, cb){
+  fetch('https://abacus.jasoncameron.dev/hit/httpyeoreum-seventeen-type/'+id+'-p90')
+    .then(function(r){ return r.json(); })
+    .then(function(d){ cb(d && (d.value!==undefined ? d.value : d.count)); })
+    .catch(function(){ cb(null); });
+}
+
+// URLをクリップボードにコピー（フォールバック付き）
+function copyUrl(){
+  var el=document.getElementById('rshare');
+  var ok=function(){ if(!el) return; el.textContent=T[lang].copied; el.classList.add('done'); setTimeout(function(){ if(el){ el.textContent=T[lang].share; el.classList.remove('done'); } },1800); };
+  var url=location.href;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(ok, function(){ legacyCopy(url,ok); });
+  } else { legacyCopy(url,ok); }
+}
+function legacyCopy(text, ok){
+  try{ var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); ok(); }catch(e){}
+}
 
 function answer(opt){
   history.push(opt);
@@ -579,18 +610,39 @@ function renderResult(t){
     + `<div class="axleg"><span class="sw sw-m"></span>${top.m.name}<span class="sw sw-u"></span>${t.you}</div>`
     + `<div class="axes2">${axisHtml}</div>`;
 
+  // 90%以上一致カウンター（top.pct>=90 のときだけ表示）
+  const hitCached = hitState && hitState.id===top.m.id;
+  const hitHtml = top.pct>=90
+    ? `<div class="rhit" id="rhit"${hitCached?'':' style="display:none"'}>${hitCached?T[lang].hit(top.m.name, hitState.n):''}</div>`
+    : "";
+
   card.innerHTML=`
     <div class="rmatch">${t.resultMatch}</div>
     <div class="rface" style="background:${top.m.color}">${top.m.init}<img src="${encodeURI(top.m.id)}.jpg" alt="" onerror="this.remove()"></div>
     <div class="rpct">${top.pct}%</div>
     <div class="rname">${top.m.name}</div>
     <div class="rtitle">${top.m.title[lang]}</div>
+    ${hitHtml}
     <div class="rdesc">${top.m.desc[lang]}</div>
     ${styleHtml}
     <div class="subhead">${t.rankHead}</div>
     <div class="rank">${rankHtml}</div>
+    <div class="rshare" id="rshare" onclick="copyUrl()">${t.share}</div>
     <button class="btn ghost" onclick="startQuiz()">${t.retry}</button>
   `;
+  // 90%以上ならカウンターを+1して表示（一度だけ）
+  if(top.pct>=90 && !hitCached && !hitBusy){
+    hitBusy=true;
+    fetchHit(top.m.id, function(n){
+      hitBusy=false;
+      if(n==null) return;
+      hitState={id:top.m.id, n:n};
+      if(step>=QUESTIONS.length && ranked()[0].m.id===top.m.id){
+        var el=document.getElementById('rhit');
+        if(el){ el.innerHTML=T[lang].hit(top.m.name, n); el.style.display=''; }
+      }
+    });
+  }
   // 可能なら写真から色を抽出して背景を更新（不可なら代表色のまま）
   extractColor(encodeURI(top.m.id)+'.jpg', function(c){
     if(c && step>=QUESTIONS.length && ranked()[0].m.id===top.m.id){
