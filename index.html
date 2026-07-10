@@ -28,6 +28,7 @@
     padding:34px 16px 66px;
     -webkit-font-smoothing:antialiased;
     transition:background .5s ease;
+    touch-action:manipulation;
   }
   .wrap{width:100%; max-width:588px; position:relative}
 
@@ -103,9 +104,20 @@
   .rface img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
   .rpct{text-align:center; font-size:22px; font-weight:800; color:var(--accent); letter-spacing:.01em; margin:0 0 2px}
   .rname{text-align:center; font-size:29px; font-weight:800; letter-spacing:-.01em; margin:2px 0 4px}
-  .rtitle{text-align:center; font-size:14.5px; font-weight:800; color:var(--ink); margin-bottom:20px}
-  .rdesc{font-size:14px; line-height:1.9; color:#37342c; background:#f4eee1; border:1.5px solid var(--ink); padding:13px 15px; margin-bottom:22px}
+  .rtitle{text-align:center; font-size:13px; font-weight:800; color:var(--ink); margin-bottom:20px}
+  .rdesc{font-size:13px; line-height:1.9; color:#37342c; background:#f4eee1; border:1.5px solid var(--ink); padding:13px 15px; margin-bottom:22px}
 
+  .axleg{display:flex; justify-content:center; align-items:center; gap:6px; font-size:10.5px; font-weight:800; color:var(--ink-soft); margin-bottom:14px}
+  .axleg .sw{display:inline-block}
+  .axleg .sw-m{width:9px; height:12px; background:var(--accent); border:1.5px solid var(--ink)}
+  .axleg .sw-u{width:12px; height:12px; border-radius:50%; background:var(--card); border:1.5px solid var(--ink)}
+  .axes2{display:grid; grid-template-columns:1fr 1fr; column-gap:16px; row-gap:14px; margin:2px 0 22px}
+  .axis{margin:0}
+  .axis-l{display:flex; justify-content:space-between; font-size:11px; font-weight:800; color:var(--ink-soft); margin-bottom:5px}
+  .axis-t{position:relative; height:6px; background:var(--track); border:1.5px solid var(--ink)}
+  .axis-t .mk{position:absolute; top:50%; transform:translate(-50%,-50%); border:1.5px solid var(--ink)}
+  .axis-t .mk-m{width:9px; height:15px; background:var(--accent)}
+  .axis-t .mk-u{width:14px; height:14px; border-radius:50%; background:var(--card)}
   .subhead{display:flex; align-items:center; gap:12px; font-size:11px; font-weight:800; letter-spacing:.18em; color:var(--ink); text-transform:uppercase; margin:6px 0 14px}
   .subhead::before, .subhead::after{content:""; flex:1; height:1.5px; background:var(--ink)}
   .rank{margin:6px 0 20px}
@@ -222,6 +234,58 @@ const MEMBERS = [
     desc:{ja:"情熱的で自由奔放、でも慎重に動く二面性の持ち主。不確かな場面では動きにくく、クールに見えることも。成長とともに、人に寄り添える優しさを育ててきたタイプ。繊細で、拒まれるとすぐ落ち込む一面も。自由と理想を大事にしつつ、譲れない軸はしっかり守る末っ子。",
         ko:"열정적이고 자유분방하면서도 신중하게 움직이는 양면의 소유자. 불확실한 상황에선 잘 나서지 못해 쿨하게 보이기도. 성장하며 남에게 다가가는 다정함을 키워온 타입. 섬세해서, 거절당하면 금세 가라앉는 면도. 자유와 이상을 소중히 여기면서도, 양보 못 할 축은 확실히 지키는 막내."} },
 ];
+
+/* ---- 回答スタイルのキーワード。投票（votes）× メンバーのstyleを集計して上位を表示 ---- */
+const KEYWORDS = {
+  act:{ja:"行動派", ko:"행동파"},
+  caution:{ja:"慎重派", ko:"신중파"},
+  social:{ja:"社交派", ko:"사교파"},
+  mypace:{ja:"マイペース", ko:"마이페이스"},
+  emotion:{ja:"感情ゆたか", ko:"감정 풍부"},
+  cool:{ja:"クール", ko:"쿨함"},
+  plan:{ja:"計画派", ko:"계획파"},
+  intuition:{ja:"直感派", ko:"직감파"},
+  care:{ja:"気くばり", ko:"배려파"},
+  creative:{ja:"独創派", ko:"독창파"},
+  leader:{ja:"リーダー気質", ko:"리더 기질"},
+  passion:{ja:"情熱家", ko:"열정가"},
+  perfect:{ja:"完璧主義", ko:"완벽주의"},
+  humor:{ja:"ムードメーカー", ko:"무드메이커"},
+  positive:{ja:"ポジティブ", ko:"긍정파"},
+  delicate:{ja:"繊細", ko:"섬세함"},
+  challenge:{ja:"冒険心", ko:"모험심"},
+  balance:{ja:"バランス感覚", ko:"균형 감각"},
+};
+const MEMBER_STYLES = {
+  scoups:["caution","leader","care"],
+  jeonghan:["balance","mypace","humor"],
+  joshua:["social","creative","emotion"],
+  jun:["act","challenge","mypace"],
+  hoshi:["passion","leader","act"],
+  wonwoo:["caution","delicate","mypace"],
+  woozi:["perfect","plan","mypace"],
+  the8:["creative","cool","mypace"],
+  mingyu:["care","act","social"],
+  dk:["intuition","positive","creative"],
+  seungkwan:["balance","care","humor"],
+  vernon:["mypace","act","cool"],
+  dino:["caution","care","delicate"],
+};
+
+/* ---- タイプ傾向：対になる軸。値0=左, 100=右。||マーカーで位置表示 ---- */
+const AXES2 = [
+  {l:{ja:"慎重派", ko:"신중파"},   r:{ja:"行動派", ko:"행동파"}},
+  {l:{ja:"クール", ko:"쿨함"},     r:{ja:"感情ゆたか", ko:"감정 풍부"}},
+  {l:{ja:"マイペース", ko:"마이페이스"}, r:{ja:"社交派", ko:"사교파"}},
+  {l:{ja:"直感派", ko:"직감파"},   r:{ja:"計画派", ko:"계획파"}},
+];
+// 軸の順: [行動, 感情, 社交, 計画]  0=左ラベル寄り / 100=右ラベル寄り
+const MEMBER_AXES = {
+  scoups:[35,72,55,62], jeonghan:[40,55,45,40], joshua:[70,85,82,45],
+  jun:[92,45,40,30], hoshi:[85,80,78,55], wonwoo:[25,25,20,75],
+  woozi:[20,20,25,95], the8:[72,78,45,35], mingyu:[80,82,85,60],
+  dk:[68,88,70,15], seungkwan:[55,90,88,58], vernon:[88,30,35,40], dino:[45,60,50,60],
+};
 
 /* ---- 質問。各選択肢 m:[] に「その選択肢を選びそうなメンバーid」を入れる ---- */
 const QUESTIONS = [
@@ -358,6 +422,7 @@ const T = {
     q:"問", of:"／", back:"前の質問へ",
     resultMatch:"＜BEST MATCH＞",
     rankHead:"似ているメンバー",
+    styleHead:"タイプ傾向", you:"あなた",
     retry:"もう一度診断する",
     share:"結果はスクショで共有できます",
     foot:"",
@@ -373,6 +438,7 @@ const T = {
     q:"문항", of:"／", back:"이전 질문으로",
     resultMatch:"＜BEST MATCH＞",
     rankHead:"닮은 멤버",
+    styleHead:"성향", you:"나",
     retry:"다시 진단하기",
     share:"결과는 캡처해서 공유할 수 있어요",
     foot:"",
@@ -489,14 +555,29 @@ function renderResult(t){
   const maxPct=Math.max(1, r[0].pct);
 
   const rankHtml = r.slice(0,3).map((x,idx)=>{
-    const w = Math.round((x.pct/maxPct)*100);
     return `<div class="rankrow ${idx===0?'top':''}">
       <div class="rk">${idx+1}</div>
       <div class="rn">${x.m.name}</div>
-      <div class="rb"><i style="width:${w}%;background:${x.m.color}"></i></div>
+      <div class="rb"><i style="width:${x.pct}%;background:${x.m.color}"></i></div>
       <div class="rp">${x.pct}%</div>
     </div>`;
   }).join("");
+
+  // タイプ傾向：メンバーの値 と あなたの回答（投票の加重平均）を並べて比較
+  const av = MEMBER_AXES[top.m.id] || [50,50,50,50];
+  const totV = MEMBERS.reduce((s,m)=> s+votes[m.id], 0) || 1;
+  const userAxis = AXES2.map((_,i)=> MEMBERS.reduce((s,m)=> s + votes[m.id]*((MEMBER_AXES[m.id]||[50,50,50,50])[i]), 0) / totV);
+  const clamp = x => Math.max(0, Math.min(100, x));
+  const axisHtml = AXES2.map((ax,i)=>{
+    const mv = clamp(av[i]), uv = clamp(userAxis[i]);
+    return `<div class="axis">
+      <div class="axis-l"><span>${ax.l[lang]}</span><span>${ax.r[lang]}</span></div>
+      <div class="axis-t"><span class="mk mk-u" style="left:${uv}%"></span><span class="mk mk-m" style="left:${mv}%"></span></div>
+    </div>`;
+  }).join("");
+  const styleHtml = `<div class="subhead">${t.styleHead}</div>`
+    + `<div class="axleg"><span class="sw sw-m"></span>${top.m.name}<span class="sw sw-u"></span>${t.you}</div>`
+    + `<div class="axes2">${axisHtml}</div>`;
 
   card.innerHTML=`
     <div class="rmatch">${t.resultMatch}</div>
@@ -505,6 +586,7 @@ function renderResult(t){
     <div class="rname">${top.m.name}</div>
     <div class="rtitle">${top.m.title[lang]}</div>
     <div class="rdesc">${top.m.desc[lang]}</div>
+    ${styleHtml}
     <div class="subhead">${t.rankHead}</div>
     <div class="rank">${rankHtml}</div>
     <button class="btn ghost" onclick="startQuiz()">${t.retry}</button>
