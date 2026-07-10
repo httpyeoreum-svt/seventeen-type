@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEVENTEEN 相性診断 / 궁합 진단</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800;900&family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f1ede2;
+    --card:#fffdf6;
+    --ink:#1c1b18;
+    --ink-soft:#726c5f;
+    --accent:#df6f8c;
+    --accent-d:#cc5d7b;
+    --track:#e7e0d2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Noto Sans JP","Noto Sans KR","Hiragino Kaku Gothic ProN","Malgun Gothic",system-ui,sans-serif;
+    background:var(--paper);
+    color:var(--ink); min-height:100%;
+    display:flex; align-items:flex-start; justify-content:center;
+    padding:34px 16px 66px;
+    -webkit-font-smoothing:antialiased;
+    transition:background .5s ease;
+  }
+  .wrap{width:100%; max-width:588px; position:relative}
+
+  .langbar{display:flex; justify-content:flex-end; margin-bottom:18px}
+  .langbar button{
+    border:1.5px solid var(--ink); background:transparent; color:var(--ink);
+    padding:6px 15px; font-size:12.5px; font-weight:700; cursor:pointer; letter-spacing:.03em; transition:.12s;
+  }
+  .langbar button + button{border-left:none}
+  .langbar button.on{background:var(--ink); color:var(--paper)}
+
+  .card{
+    background:var(--card); border:1.5px solid var(--ink);
+    box-shadow:8px 8px 0 var(--ink);
+    padding:34px 30px 30px; position:relative;
+  }
+
+  .kicker{font-size:12px; letter-spacing:.24em; font-weight:800; color:var(--accent); text-transform:uppercase}
+  h1{font-size:27px; line-height:1.45; margin:2px 0 6px; font-weight:700; letter-spacing:-.01em}
+  h1 .g{color:var(--accent)}
+  .lead{color:var(--ink-soft); font-size:14px; line-height:1.9; margin:16px 0 4px}
+  .lead small{display:inline-block; margin-top:12px; font-size:11px; color:#9a9488; line-height:1.75}
+
+  .btn{
+    display:block; width:100%; border:1.5px solid var(--ink); cursor:pointer;
+    background:var(--accent); color:#fff;
+    font-size:15.5px; font-weight:800; letter-spacing:.03em; padding:15px;
+    box-shadow:4px 4px 0 var(--ink); transition:transform .1s, box-shadow .1s; margin-top:24px;
+  }
+  .btn:hover{transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--ink)}
+  .btn:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink)}
+  .btn.ghost{background:var(--card); color:var(--ink); box-shadow:none; margin-top:12px}
+  .btn.ghost:hover{background:#efe9dc; transform:none; box-shadow:none}
+
+  .prog{height:6px; background:var(--track); border:1.5px solid var(--ink); overflow:hidden; margin-bottom:10px}
+  .prog i{display:block; height:100%; width:0; background:linear-gradient(90deg, var(--accent) 0%, #bd7fbf 50%, #7fa8e6 100%); background-size:calc(10000% / var(--p, 100)) 100%; background-repeat:no-repeat; background-position:left center; transition:.35s}
+  .qcount{font-size:11px; font-weight:800; color:var(--ink-soft); letter-spacing:.16em; text-transform:uppercase; margin-bottom:18px; text-align:right}
+  .back{display:inline-flex; align-items:center; gap:8px; background:none; border:none; color:var(--ink-soft); font-size:13px; font-weight:700; cursor:pointer; padding:2px 0; margin-bottom:14px; transition:.12s}
+  .back:hover{color:var(--accent)}
+  .back svg{width:17px; height:17px; stroke:currentColor; stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round}
+  .qtext{font-size:19.5px; line-height:1.55; font-weight:700; letter-spacing:-.01em; margin-bottom:22px; min-height:30px}
+  .opts{display:flex; flex-direction:column; gap:10px}
+  .opt{
+    text-align:left; border:1.5px solid var(--ink); background:var(--card); color:var(--ink);
+    padding:14px 16px; font-size:14.5px; line-height:1.5; font-weight:600; cursor:pointer;
+    transition:transform .1s, box-shadow .1s, background .1s, color .1s; box-shadow:3px 3px 0 rgba(28,27,24,.13);
+  }
+  .opt:hover{background:var(--accent); color:#fff; box-shadow:4px 4px 0 var(--ink); transform:translate(-1px,-1px)}
+
+  .imgopts{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .imgopt{border:1.5px solid var(--ink); background:var(--card); padding:10px; cursor:pointer;
+    display:flex; flex-direction:column; gap:9px; align-items:center; text-align:center;
+    transition:transform .1s, box-shadow .1s; box-shadow:3px 3px 0 rgba(28,27,24,.13)}
+  .imgopt:hover{transform:translate(-1px,-1px); box-shadow:5px 5px 0 var(--ink)}
+  .imgopt img{width:100%; aspect-ratio:1/1; object-fit:cover; border:1.5px solid var(--ink); display:block; background:#eae4d6}
+  .imgopt span{font-size:12.5px; font-weight:700; line-height:1.45; color:var(--ink)}
+
+  .rface{
+    position:relative; overflow:hidden;
+    width:96px; height:96px; border:1.5px solid var(--ink); box-shadow:5px 5px 0 var(--ink); margin:2px auto 18px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:30px; font-weight:800; color:#fff; letter-spacing:.02em;
+  }
+  .rface img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
+  .rmatch{text-align:center; font-size:11px; font-weight:800; letter-spacing:.2em; color:var(--accent); text-transform:uppercase}
+  .rname{text-align:center; font-size:29px; font-weight:800; letter-spacing:-.01em; margin:7px 0 3px}
+  .rtitle{text-align:center; font-size:14.5px; font-weight:800; color:var(--ink); margin-bottom:20px}
+  .rpct{display:none}
+  .rdesc{font-size:14px; line-height:1.95; color:#37342c; background:#f4eee1; border:1.5px solid var(--ink); padding:18px; margin-bottom:22px}
+
+  .subhead{font-size:11px; font-weight:800; letter-spacing:.18em; color:var(--ink); text-transform:uppercase; margin:6px 0 14px; text-align:center}
+  .rank{margin:6px 0 20px}
+  .rankrow{display:grid; grid-template-columns:22px 76px 1fr 40px; align-items:center; gap:9px; margin-bottom:8px}
+  .rankrow .rk{font-size:12px; font-weight:800; color:#bcb3a1; text-align:center}
+  .rankrow .rn{font-size:12.5px; font-weight:800; color:var(--ink)}
+  .rankrow .rb{height:13px; background:var(--track); border:1.5px solid var(--ink); overflow:hidden}
+  .rankrow .rb i{display:block; height:100%}
+  .rankrow .rp{font-size:12px; font-weight:800; color:var(--ink-soft); text-align:right}
+  .rankrow.top .rn{color:var(--accent)}
+  .rankrow.top .rk{color:var(--accent)}
+
+  .foot{text-align:center; font-size:10.5px; color:#a49d8e; margin-top:18px; line-height:1.7}
+  @media(max-width:480px){
+    .card{padding:26px 20px; box-shadow:6px 6px 0 var(--ink)}
+    h1{font-size:25px}
+    .qtext{font-size:18px}
+    .rname{font-size:27px}
+    .rankrow{grid-template-columns:20px 60px 1fr 34px; gap:7px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="langbar">
+    <button id="lang-ja" class="on" onclick="setLang('ja')">日本語</button>
+    <button id="lang-ko" onclick="setLang('ko')">한국어</button>
+  </div>
+  <div class="card" id="card"></div>
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+/* ============================================================
+   SEVENTEEN 相性診断 — メンバー投票制
+   採点: 各選択肢の m:[memberId...] にメンバーを割り当てる。
+        回答されるとそのメンバーに1票。最多得票が診断結果。
+   member id: scoups jeonghan joshua jun hoshi wonwoo woozi
+              the8 mingyu dk seungkwan vernon dino
+   ============================================================ */
+
+const MEMBERS = [
+  { id:"scoups", color:"#e4788f", init:"SC", name:"S.COUPS",
+    title:{ja:"沈思黙考の努力家リーダー", ko:"심사숙고하는 노력파 리더"},
+    sim:{ja:"気質が <b>DK・SEUNGKWAN</b> と同じ", ko:"기질이 <b>도겸·승관</b>과 같음"},
+    desc:{ja:"感受性が豊かで色んな感情を繊細に感じ取るけれど、興味があってもすぐ実行には移さず沈思黙考するタイプ。対人では丁寧で礼儀正しい。自分と周りをより良くしたいという想いが強く、成功や物質への欲求も高め。真面目に努力し続けるのは少し苦手で、達成動機は高いのに自分では満足しきれない…そんな最年長リーダー。頼られれば自分を後回しにしてでも助けようとする寛大さがあり、その堂々とした立ち姿で自然と人を惹きつける。",
+        ko:"감수성이 풍부해 여러 감정을 섬세하게 느끼지만, 관심이 있어도 바로 실행에 옮기기보다 심사숙고하는 타입. 사람을 대할 땐 정중하고 예의 바름. 나와 주변을 더 낫게 만들고 싶은 마음이 크고 성공·물질 욕구도 높은 편. 꾸준히 노력하는 건 조금 어려워하고, 성취동기는 높은데 스스로는 만족하지 못하는 맏형 리더. 누가 기대면 자신을 뒤로 미루더라도 도우려는 너그러움이 있고, 그 당당한 모습으로 자연스럽게 사람을 끌어당긴다."} },
+
+  { id:"jeonghan", color:"#c98bd6", init:"JH", name:"JEONGHAN",
+    title:{ja:"気まぐれマルチーズ", ko:"변덕쟁이 말티즈"}, sim:null,
+    desc:{ja:"刺激的で冒険的なことに惹かれるのに、軽率に飛び込むことはめったにない慎重派。ただし窮地に追い込まれると不安定な面が飛び出し、逆に不安が消えると危なそうなことにも大胆に挑む。外向的か内向的か一見わからない。他人への寛大さは控えめで、自分と違う価値観には批判的。仲間の中でも目立ちたい。持続力は低く『まあこれくらいでいいか』が口ぐせ。バランス感覚に優れ、場を見て冗談で空気を和ませるのも上手。争いを避けようとして、つい本音を飲み込んでしまうことも。",
+        ko:"자극적이고 모험적인 것에 끌리면서도 경솔하게 뛰어드는 일은 드문 신중파. 다만 궁지에 몰리면 불안정한 면이 튀어나오고, 반대로 불안이 사라지면 위험해 보이는 것에도 대담하게 도전. 외향인지 내향인지 한눈에 알기 어려움. 관대함은 적은 편이라 나와 다른 가치관엔 비판적. 무리 안에서도 튀고 싶어함. 인내력은 낮고 '이 정도면 됐지'가 습관. 균형 감각이 뛰어나고 분위기를 봐서 농담으로 공기를 풀어주는 것도 능숙. 다툼을 피하려다 문득 속마음을 삼켜버리기도."} },
+
+  { id:"joshua", color:"#7ea6e6", init:"JS", name:"JOSHUA",
+    title:{ja:"独創的な社交家", ko:"독창적인 사교가"},
+    sim:{ja:"性格が <b>THE 8</b> と同じ／気質は <b>MINGYU</b> とも", ko:"성격이 <b>디에잇</b>과 같고 기질은 <b>민규</b>와도"},
+    desc:{ja:"人付き合いを楽しみ、集団の中で認められ愛されたいタイプ。社交的で感情豊か、自分に関心が集まる状況が好き。その分感情の起伏が激しく少し不安定で、外の状況に敏感に反応しすぎることも。独創的でクリエイティブ、集団の中でもよく目立つ。時に自分の欲求に没頭して自己中で現実離れした印象を与えることも。派手さより着実さで、一歩ずつ我慢強く目標へ近づく努力家。飾らない誠実さと独特のユーモアで信頼を集める。",
+        ko:"사람들과 어울리는 걸 즐기고 집단 안에서 인정받고 사랑받고 싶은 타입. 사교적이고 감정이 풍부하며 자신에게 관심이 모이는 상황을 좋아함. 그만큼 감정 기복이 크고 조금 불안정해 외부 상황에 예민하게 반응하기도. 독창적이고 창의적이라 무리 안에서도 잘 눈에 띔. 가끔 자기 욕구에 빠져 자기중심적이고 붕 뜬 인상을 주기도. 화려함보다 착실함으로 한 걸음씩 끈기 있게 목표에 다가가는 노력파. 꾸밈없는 성실함과 독특한 유머로 신뢰를 얻는다."} },
+
+  { id:"jun", color:"#6fc4b8", init:"JUN", name:"JUN",
+    title:{ja:"大胆な冒険家", ko:"대담한 모험가"}, sim:null,
+    desc:{ja:"新しい状況や初対面の人にも迷わず積極的に近づく外向タイプ。危険を伴うことにも大胆に挑戦し、スリルを好む。困難が予想されてもあまり心配しない。同じことの繰り返しは苦手で、絶えず変化を求める。物事がうまくいかないと落ち着かなくなる面も。他人と深い部分まで共感するのは難しく、自分と考えの違う人を簡単には受け入れないタイプ。好奇心が旺盛で色々なことに興味が湧くぶん、一つを極める前に次へ心が移りやすい移り気な一面も。",
+        ko:"새로운 상황이나 처음 보는 사람에게도 망설임 없이 다가가는 외향 타입. 위험한 일에도 대담하게 도전하고 스릴을 즐김. 어려움이 예상돼도 크게 걱정하지 않음. 같은 일의 반복은 싫어하고 끊임없이 변화를 원함. 일이 잘 안 풀리면 안절부절 못하는 면도. 남과 깊이 공감하긴 어렵고, 나와 생각이 다른 사람을 쉽게 받아들이지 않는 타입. 호기심이 왕성해 여러 가지에 관심이 생기는 만큼, 하나를 파고들기 전에 다음으로 마음이 옮겨가는 변덕스러운 면도."} },
+
+  { id:"hoshi", color:"#f0985a", init:"HS", name:"HOSHI",
+    title:{ja:"情熱と責任感No.1", ko:"열정과 책임감 1위"}, sim:null,
+    desc:{ja:"内気に見えるかもしれないけど、実は豊かな感受性と瞬発力を持つ情熱的なタイプ。状況で感情が大きく揺れ、内気な自分でありたいと気まぐれにアピールする一面も。目標がはっきりしていて『自分ならできる』という確信があり、担ったことに全力を尽くす。協力の場でトラブルが起きると他人を非難することもあるほど、成し遂げる意志が誰よりも強いリーダー気質。好奇心旺盛で興味の幅が広く、ときどきハッとするような突飛な発想も飛び出す。",
+        ko:"수줍어 보일 수 있지만 사실은 풍부한 감수성과 순발력을 지닌 열정적인 타입. 상황에 따라 감정이 크게 흔들리고, 내향적이고 싶다며 변덕스럽게 어필하는 면도. 목표가 뚜렷하고 '나라면 할 수 있다'는 확신이 있어 맡은 일에 전력을 다함. 협업 중 문제가 생기면 남을 탓하기도 할 만큼, 해내려는 의지가 누구보다 강한 리더 기질. 호기심이 왕성하고 관심사가 넓어, 가끔 번뜩이는 엉뚱한 발상이 튀어나오기도."} },
+
+  { id:"wonwoo", color:"#5b6bb0", init:"WW", name:"WONWOO",
+    title:{ja:"慎重なビジュアル", ko:"신중한 비주얼"},
+    sim:{ja:"気質が <b>DINO</b> と同じ", ko:"기질이 <b>디노</b>와 같음"},
+    desc:{ja:"色んな可能性を考慮して慎重に判断・行動するタイプ。少し臆病で冷たい印象を与えることも。小さなことまで心配するので、利己的に見えることもある。所有欲が強く、何かを譲るのはあまり得意ではない。人見知りで、打ち解けるまでには少し時間がかかるけれど、心を許した相手にはまっすぐ向き合う人。そばにいると場が和む優しさを持つ一方、人の感情に影響されやすく、繊細に傷つきやすい心の持ち主でもある。",
+        ko:"여러 가능성을 따져 신중하게 판단·행동하는 타입. 조금 소심하고 차가운 인상을 주기도. 사소한 것까지 걱정해서 이기적으로 보일 때도. 소유욕이 강해 뭔가 양보하는 건 별로 잘 못하는 편. 낯을 가려 친해지기까지 시간이 조금 걸리지만, 마음을 연 상대에겐 진심으로 대하는 사람. 곁에 있으면 분위기가 편안해지는 다정함을 지닌 한편, 남의 감정에 영향을 잘 받고 섬세하게 상처받기 쉬운 마음의 소유자."} },
+
+  { id:"woozi", color:"#8f7ad6", init:"WZ", name:"WOOZI",
+    title:{ja:"完璧主義の社長", ko:"완벽주의 사장님"}, sim:null,
+    desc:{ja:"どちらかというと『社長』スタイル。細かい性格で小さなことも見逃さず、ルールや基準を守ることに厳しい。物事を完璧に準備して体系的に処理するのを好み、感情は外に出さずコントロールする。完璧主義ゆえに効率が落ちることもあり、少し融通が利かない一面も。誰かと協力するより一人で頑張る方が好きで、トラブルで傷つくと相手を簡単には許せないタイプ。自分だけの確かな見解を持ち、周りにも自分にも高いものを求めながら、それに見合う努力を惜しまない。",
+        ko:"굳이 따지면 '사장님' 스타일. 꼼꼼한 성격이라 사소한 것도 놓치지 않고 규칙과 기준을 지키는 데 엄격함. 일을 완벽하게 준비해 체계적으로 처리하는 걸 좋아하고 감정은 밖으로 안 드러내고 조절함. 완벽주의 탓에 효율이 떨어질 때도 있고 조금 융통성이 없는 면도. 협력보다 혼자 해내는 걸 선호하고, 갈등으로 상처받으면 상대를 쉽게 용서하지 못하는 타입. 자신만의 확고한 견해를 지니고, 주변에도 자신에게도 높은 것을 요구하면서 그에 걸맞은 노력을 아끼지 않는다."} },
+
+  { id:"the8", color:"#59b3a0", init:"T8", name:"THE 8",
+    title:{ja:"クリエイティブな自由人", ko:"크리에이티브한 자유인"},
+    sim:{ja:"性格が <b>JOSHUA</b> と同じ／気質は <b>MINGYU</b> とも", ko:"성격이 <b>조슈아</b>과 같고 기질은 <b>민규</b>와도"},
+    desc:{ja:"人付き合いを楽しみ、認められ愛されたい社交派。感情豊かで魅力的だけど、感情の起伏があり外の状況に敏感。独創的でクリエイティブ、集団の中でもよく目立つ。気質的には安定していて不安が少ないタイプ。時に自分の欲求に没頭して自己中で現実離れした印象を与えることも。物事を感覚的にとらえて表現する、アーティスト気質の持ち主。独自の視点から斬新で大胆な表現を生み出すのが魅力で、他人にも自分にも高い基準を求めてしっかり努力する。",
+        ko:"사람들과 어울리는 걸 즐기고 인정받고 사랑받고 싶은 사교파. 감정이 풍부하고 매력적이지만 기복이 있고 외부 상황에 예민함. 독창적이고 창의적이라 무리 안에서도 잘 눈에 띔. 기질적으론 안정적이라 불안이 적은 타입. 가끔 자기 욕구에 빠져 자기중심적이고 붕 뜬 인상을 주기도. 사물을 감각적으로 받아들이고 표현하는 아티스트 기질의 소유자. 독자적인 시선에서 참신하고 대담한 표현을 만들어내는 게 매력이며, 남에게도 자신에게도 높은 기준을 두고 노력한다."} },
+
+  { id:"mingyu", color:"#3f9fd6", init:"MG", name:"MINGYU",
+    title:{ja:"唯一の利他家", ko:"유일한 이타주의자"},
+    sim:{ja:"気質が <b>JOSHUA・THE 8</b> と同じ", ko:"기질이 <b>조슈아·디에잇</b>과 같음"},
+    desc:{ja:"他人をよく理解して受け入れるタイプで、対人では同情心が強く相手を助けようとする。いつも周りと良い関係を保とうと努力する。メンバーの中でも指折りの『利他家』で、気にしなくていい部分まで気を配ってしまうほど。細かいことを引きずらない性格なので、悪意なく人に尽くせる、不安も少なく生まれつき明るく大らかな人。理想に向かって意志と勇気で前へ進む行動力があり、束縛されるのは少し苦手なタイプ。",
+        ko:"남을 잘 이해하고 받아들이는 타입이라 대인관계에서 동정심이 강하고 상대를 도우려 함. 늘 주변과 좋은 관계를 유지하려 노력. 멤버 중에서도 손꼽히는 '이타주의자'로, 신경 안 써도 될 부분까지 챙길 정도. 사소한 걸 담아두지 않는 성격이라 악의 없이 남에게 베풀 수 있는, 불안도 적고 타고나길 밝고 너그러운 사람. 이상을 향해 의지와 용기로 앞으로 나아가는 행동력이 있고, 얽매이는 건 조금 어려워하는 타입."} },
+
+  { id:"dk", color:"#f0b84a", init:"DK", name:"DK",
+    title:{ja:"ロマンチックな夢想家", ko:"로맨틱한 몽상가"},
+    sim:{ja:"気質が <b>S.COUPS・SEUNGKWAN</b> と同じ", ko:"기질이 <b>에스쿱스·승관</b>과 같음"},
+    desc:{ja:"想像力が豊かで何にでも関心を持つけれど、それを実現する方法を見つけるのは少し苦手で、よく戸惑う。論理立てて考えるより、直感やイメージで動くタイプ。目標を立てて地道に努力するのは得意ではなく、漠然とした空想に没頭しがち。でも、その自由な発想力こそが魅力のロマンチックな夢想家。型にはまらない発想で理想を追いかけ、周りには友好的。それでいて自分の信じる軸はしっかり持っている。",
+        ko:"상상력이 풍부해 뭐든 관심을 갖지만, 그걸 실현할 방법을 찾는 건 조금 어려워해 자주 헤맴. 논리적으로 따지기보다 직감과 이미지로 움직이는 타입. 목표를 세워 꾸준히 노력하는 건 잘 못하고 막연한 공상에 빠지기 쉬움. 하지만 그 자유로운 발상력이야말로 매력인 로맨틱한 몽상가. 틀에 얽매이지 않는 발상으로 이상을 좇고 주변엔 친화적. 그러면서도 자신이 믿는 축은 확실히 지니고 있다."} },
+
+  { id:"seungkwan", color:"#e88f5a", init:"SK", name:"SEUNGKWAN",
+    title:{ja:"バランスの空気読み", ko:"균형 잡힌 눈치왕"},
+    sim:{ja:"性格が <b>VERNON</b> と似ている", ko:"성격이 <b>버논</b>과 비슷함"},
+    desc:{ja:"極端な項目がなくバランスの取れたタイプ。気質では個性がはっきりしているけれど、成長の過程での性格変化でそれが中和された。自分への自信もありつつ、周りの空気を読むのにも長けている。責任感があり常に自信もあるけど、現実的な満足のために長期目標は後回しにしがち。他人の感情をよく理解しつつ自分の利益も追求。弱点がバレると防御的になる一面も。責任感が強く着実に努力を積み重ねて信頼される一方、独特のユーモアで場を沸かせる魅力も持っている。",
+        ko:"극단적인 항목이 없는 균형 잡힌 타입. 기질에선 개성이 뚜렷하지만 성장 과정의 성격 변화로 그것이 중화됨. 자신에 대한 자신감도 있으면서 주변 눈치도 잘 봄. 책임감 있고 늘 자신감도 있지만 현실적 만족을 위해 장기 목표는 뒤로 미루는 편. 남의 감정을 잘 이해하면서 자기 이익도 챙김. 약점이 드러나면 방어적이 되는 면도. 책임감이 강하고 착실하게 노력을 쌓아 신뢰받는 한편, 독특한 유머로 분위기를 달구는 매력도 지녔다."} },
+
+  { id:"vernon", color:"#5aa9e0", init:"VN", name:"VERNON",
+    title:{ja:"信念の一匹狼", ko:"신념의 늑대"},
+    sim:{ja:"性格が <b>SEUNGKWAN</b> と似ている", ko:"성격이 <b>승관</b>과 비슷함"},
+    desc:{ja:"行動力と瞬発力があり、自分の考えや立場がはっきりしている。自分の行動でトラブルが起こり得ると分かっていても、自分が楽しければ迷わずやる。他人からの評価より自分の信念を重視し、可能性に挑戦するのが好き。非難を気にせず自分の道を進むタイプ。ただし性格の面では意外と空気を読み、『これはダメかな』と自分をちゃんとコントロールできるバランス感覚の持ち主。既存のやり方にとらわれず、鋭い観察眼で矛盾や不公平にはきちんと違和感を覚える。友好的でいながら、自分の理想は曲げない。",
+        ko:"행동력과 순발력이 있고 자기 생각과 입장이 분명함. 자기 행동으로 문제가 생길 수 있다는 걸 알아도 자신이 즐거우면 망설임 없이 함. 남의 평가보다 자기 신념을 중시하고 가능성에 도전하는 걸 좋아함. 비난에 개의치 않고 자기 길을 가는 타입. 다만 성격 면에선 의외로 눈치를 봐서 '이건 아니지' 하며 스스로 잘 조절하는 균형 감각의 소유자. 기존 방식에 얽매이지 않고 예리한 관찰력으로 모순이나 불공평엔 분명히 위화감을 느낀다. 친화적이면서도 자신의 이상은 굽히지 않는다."} },
+
+  { id:"dino", color:"#7d8fd6", init:"DN", name:"DINO",
+    title:{ja:"優しく寛大な末っ子", ko:"다정하고 관대한 막내"},
+    sim:{ja:"気質が <b>WONWOO</b> と同じ", ko:"기질이 <b>원우</b>와 같음"},
+    desc:{ja:"情熱的で自由奔放な面はあるけれど、色んな可能性を考慮して慎重に動くタイプ。不確かな状況では積極性を発揮しにくく、それが利己的に映ることも(これは気質)。でも成長の過程で、他人に共感できる親切で優しい性格に。繊細なので拒まれるとすぐ傷つき、拒絶されると空虚感で憂鬱になりがち。寛大さは非常に高く、末っ子ゆえ本当は自由にやりたくても周りを気にしてしまう人。自由と理想を大切にし、鋭い観察眼で物事を見つめる。友好的だけれど自分の中に確かな軸があり、譲れないところは譲らない。",
+        ko:"열정적이고 자유분방한 면이 있지만 여러 가능성을 따져 신중하게 움직이는 타입. 불확실한 상황에선 적극성을 발휘하기 어렵고 그게 이기적으로 보이기도(이건 기질). 하지만 성장하면서 남에게 공감하는 다정하고 상냥한 성격이 됨. 섬세해서 거절당하면 금세 상처받고 공허함에 우울해지기 쉬움. 관대함이 매우 높고, 막내라 사실은 자유롭게 하고 싶어도 주변을 신경 쓰는 사람. 자유와 이상을 소중히 여기고 예리한 관찰력으로 사물을 바라본다. 친화적이지만 마음속에 확고한 축이 있어 양보 못 하는 건 양보하지 않는다."} },
+];
+
+/* ---- 質問。各選択肢 m:[] に「その選択肢を選びそうなメンバーid」を入れる ---- */
+const QUESTIONS = [
+  { ja:"💘 どんな人が好き？", ko:"💘 어떤 사람이 좋아?",
+    o:[ {ja:"知識が豊富で色々教えてくれる人", ko:"지식이 풍부해 이것저것 알려주는 사람", m:["wonwoo","woozi","mingyu"]},
+        {ja:"常に穏やかで、とにかく優しい人", ko:"늘 온화하고 그저 다정한 사람", m:["dino","jun","joshua"]},
+        {ja:"カリスマ性があり、服装や顔立ちも整っている人", ko:"카리스마 있고 옷차림·이목구비도 정돈된 사람", m:["scoups","hoshi","the8","vernon"]},
+        {ja:"明るくユーモアで人を笑わせるのが得意な人", ko:"밝고 유머러스해 사람을 잘 웃기는 사람", m:["seungkwan","jeonghan","dk"]} ]},
+
+  { ja:"🎮 好きなゲームは？", ko:"🎮 좋아하는 게임은?",
+    o:[ {ja:"FPS・シューティングゲーム", ko:"FPS·슈팅 게임", m:["scoups","mingyu"], img:"fps.jpg"},
+        {ja:"みんなで盛り上がれるパーティーゲーム", ko:"다 같이 즐기는 파티 게임", m:["jeonghan","dk","seungkwan","hoshi","vernon"], img:"party game.jpg"},
+        {ja:"戦略や推理ゲーム", ko:"전략·추리 게임", m:["wonwoo","the8","woozi"], img:"detective game.jpg"},
+        {ja:"のんびり育成ゲーム", ko:"느긋한 육성 게임", m:["joshua","dino","jun"], img:"animal game.jpg"} ]},
+
+  { ja:"🏖️ 理想の休日は？", ko:"🏖️ 이상적인 휴일은?",
+    o:[ {ja:"友人と浜辺でBBQ！", ko:"친구들과 해변에서 바비큐!", m:["hoshi","seungkwan","mingyu","jeonghan"]},
+        {ja:"友達と室内アクティビティ", ko:"친구와 실내 액티비티", m:["scoups","dk"]},
+        {ja:"一人で美術館・映画・カフェでブランチ", ko:"혼자 미술관·영화·카페에서 브런치", m:["the8","dino","vernon","joshua"]},
+        {ja:"一人でゴロゴロ、家で趣味に没頭", ko:"혼자 뒹굴뒹굴, 집에서 취미에 몰두", m:["woozi","jun","wonwoo"]} ]},
+
+  { ja:"🎵 新曲、どんなテイストで作る？", ko:"🎵 신곡, 어떤 느낌으로 만들까?",
+    o:[ {ja:"流行トレンドを活かしたキャッチーな曲", ko:"유행 트렌드를 살린 캐치한 곡", m:["dino","mingyu","hoshi"]},
+        {ja:"やりたい要素を貫いた独創的な曲", ko:"하고 싶은 요소를 밀어붙인 독창적인 곡", m:["the8","vernon","scoups"]},
+        {ja:"MVを意識した世界観のある曲", ko:"MV를 의식한 세계관 있는 곡", m:["jeonghan","joshua","jun"]},
+        {ja:"聴く人を慰める優しいバラード", ko:"듣는 사람을 위로하는 다정한 발라드", m:["wonwoo","dk","seungkwan","woozi"]} ]},
+
+  { ja:"🌃 久しぶりに夜景を見た。", ko:"🌃 오랜만에 야경을 봤다.",
+    o:[ {ja:"こんな時間まで働く人がこんなに…と心を痛める", ko:"이 시간까지 일하는 사람이 이렇게 많다니… 마음이 아파짐", m:["dk","dino"]},
+        {ja:"「綺麗だなー」", ko:"'예쁘다~'", m:["jun","vernon"]},
+        {ja:"映える位置を探して何枚か撮る", ko:"잘 나오는 위치를 찾아 몇 장 찍음", m:["scoups","wonwoo","the8","joshua"]},
+        {ja:"「あの人たちカップル？」と周りが気になる", ko:"'저 사람들 커플인가?' 하고 주변이 궁금해짐", m:["seungkwan","mingyu","jeonghan","hoshi","woozi"]} ]},
+
+  { ja:"✈️ 旅行に行くなら、どんなプラン？", ko:"✈️ 여행을 간다면 어떤 플랜?",
+    o:[ {ja:"ある程度計画をしっかり！", ko:"어느 정도 계획은 확실히!", m:["woozi","wonwoo","scoups"]},
+        {ja:"ノープラン、その場のノリで冒険", ko:"노플랜, 즉흥적으로 모험", m:["jun","vernon","hoshi","jeonghan"]},
+        {ja:"写真と食を楽しむ映え重視", ko:"사진과 먹거리를 즐기는 감성 위주", m:["joshua","the8","dino"]},
+        {ja:"思い出重視！楽しい旅行にするのが一番大事", ko:"추억 중시! 즐거운 여행이 제일 중요", m:["mingyu","seungkwan","dk"]} ]},
+
+  { ja:"😢 落ち込んだ友達がいたら？", ko:"😢 우울해하는 친구가 있다면?",
+    o:[ {ja:"相手がすっきりするまで聞く", ko:"상대가 후련해질 때까지 들어줌", m:["mingyu","dino","joshua","wonwoo"]},
+        {ja:"明るい雰囲気を作ってしんみりしないようにする", ko:"밝은 분위기를 만들어 처지지 않게 함", m:["seungkwan","dk","hoshi"]},
+        {ja:"具体的な解決策・アドバイスを出す", ko:"구체적인 해결책·조언을 제시", m:["woozi","scoups","jeonghan"]},
+        {ja:"そっと見守り、さりげなく気にかける", ko:"조용히 지켜보며 티 안 나게 챙김", m:["vernon","jun","the8"]} ]},
+
+  { ja:"🎬 バラエティでのあなたのポジションは？", ko:"🎬 예능에서 내 포지션은?",
+    o:[ {ja:"全体を回すMC・進行役", ko:"전체를 이끄는 MC·진행", m:["seungkwan","scoups","hoshi"]},
+        {ja:"ムードメーカー", ko:"분위기 메이커", m:["dk","jeonghan","mingyu"]},
+        {ja:"常識人の立場からコメントをする", ko:"상식적인 입장에서 코멘트한다", m:["woozi","wonwoo","vernon","dino"]},
+        {ja:"話を振られたらそれなりに話してみる", ko:"말을 걸어오면 나름대로 이야기해본다", m:["the8","joshua","jun"]} ]},
+
+  { ja:"💰 臨時収入が入った！何に使う？", ko:"💰 뜻밖의 수입이 생겼다! 어디에 쓸까?",
+    o:[ {ja:"欲しかったものを即買い", ko:"갖고 싶던 걸 바로 구매", m:["jun","hoshi","vernon"]},
+        {ja:"貯金して堅実に管理", ko:"저축하며 알뜰하게 관리", m:["woozi","jeonghan"]},
+        {ja:"友達にプレゼント・おごる", ko:"친구에게 선물·한턱", m:["mingyu","dino","seungkwan","wonwoo","scoups"]},
+        {ja:"趣味・自分の世界に投資", ko:"취미·나만의 세계에 투자", m:["the8","joshua","dk"]} ]},
+
+  { ja:"💅 好きなネイルは？", ko:"💅 좋아하는 네일은?",
+    o:[ {ja:"フェミニン・ガーリーなワンホンネイル", ko:"페미닌·걸리시한 왕훙 네일", m:["joshua","jeonghan","jun"], img:"pink nail.jpg"},
+        {ja:"クールなモード系ネイル", ko:"쿨한 모드 계열 네일", m:["scoups","hoshi","the8","mingyu","dino"], img:"mode nail.jpg"},
+        {ja:"ポップなアートネイル", ko:"팝한 아트 네일", m:["dk","seungkwan"], img:"pop nail.jpg"},
+        {ja:"シンプルな自爪風ネイル", ko:"심플한 자연손톱풍 네일", m:["wonwoo","woozi","vernon"], img:"simple nail.jpg"} ]},
+
+  { ja:"📱 SNSの使い方は？", ko:"📱 SNS 사용법은?",
+    o:[ {ja:"積極的に近況を発信", ko:"적극적으로 근황을 발신", m:["seungkwan","hoshi","mingyu"]},
+        {ja:"見る専門、ほぼROM", ko:"보기만 하는 눈팅족", m:["wonwoo","vernon","woozi"]},
+        {ja:"こだわりの世界観で厳選投稿", ko:"확고한 세계관으로 엄선 업로드", m:["the8","joshua","dk"]},
+        {ja:"たまに気まぐれ投稿", ko:"가끔 변덕스럽게 업로드", m:["jeonghan","scoups","dino","jun"]} ]},
+
+  { ja:"🗣️ 初対面の集まりでの自分は？", ko:"🗣️ 초면인 모임에서의 나는?",
+    o:[ {ja:"自分から話しかけ、盛り上げる", ko:"먼저 말 걸며 분위기를 띄움", m:["seungkwan","hoshi","mingyu","jeonghan"]},
+        {ja:"聞き役に回る", ko:"듣는 역할", m:["dino","joshua","scoups"]},
+        {ja:"一人か二人とだけ深く話す", ko:"한두 명과만 깊게 이야기", m:["wonwoo","woozi","dk"]},
+        {ja:"自然体でマイペース", ko:"자연스럽게 마이페이스", m:["vernon","jun","the8"]} ]},
+
+  { ja:"🧹 あなたの部屋の状態は？", ko:"🧹 내 방 상태는?",
+    o:[ {ja:"ピカピカに整理整頓", ko:"반짝반짝 정리정돈", m:["woozi","mingyu","joshua"]},
+        {ja:"散らかって見えるが本人は把握済み", ko:"어질러 보여도 본인은 다 앎", m:["scoups","the8","wonwoo"]},
+        {ja:"必要な時だけ一気に片付ける", ko:"필요할 때만 몰아서 정리", m:["hoshi","jeonghan","dk","vernon"]},
+        {ja:"物は少なくシンプル", ko:"물건 적고 심플", m:["dino","seungkwan","jun"]} ]},
+
+  { ja:"🎯 挑戦できそうなオファーが来た。", ko:"🎯 도전할 만한 기회가 왔다.",
+    o:[ {ja:"リスクがあっても即挑戦", ko:"리스크가 있어도 바로 도전", m:["jun","vernon","hoshi","mingyu","seungkwan"]},
+        {ja:"準備を固めてから慎重に", ko:"준비를 다진 뒤 신중하게", m:["woozi","wonwoo","scoups"]},
+        {ja:"ワクワクするけど不安で悩む", ko:"설레지만 불안해서 고민", m:["dk","jeonghan","dino"]},
+        {ja:"仲間と一緒なら挑戦する", ko:"동료와 함께라면 도전", m:["joshua","the8"]} ]},
+
+  { ja:"💬 褒められたときの反応は？", ko:"💬 칭찬받았을 때 반응은?",
+    o:[ {ja:"素直に大喜び", ko:"솔직하게 크게 기뻐함", m:["seungkwan","dk","hoshi","mingyu"]},
+        {ja:"照れて謙遜する", ko:"쑥스러워 겸손", m:["dino","joshua","wonwoo"]},
+        {ja:"クールに受け流す", ko:"쿨하게 넘김", m:["vernon","jun","woozi"]},
+        {ja:"内心すごく嬉しいけど平静を装う", ko:"속으론 엄청 기쁜데 평온한 척", m:["scoups","the8","jeonghan"]} ]},
+
+  { ja:"🌧️ 予定が急にキャンセルになった。", ko:"🌧️ 약속이 갑자기 취소됐다.",
+    o:[ {ja:"ラッキー、家でゆっくり", ko:"럭키, 집에서 느긋하게", m:["wonwoo","woozi","jun"]},
+        {ja:"別の予定をすぐ埋める", ko:"다른 일정으로 바로 채움", m:["hoshi","mingyu","seungkwan"]},
+        {ja:"ちょっと寂しくて落ち込む", ko:"조금 아쉽고 가라앉음", m:["dino","dk","joshua","scoups"]},
+        {ja:"気にせずすぐ切り替え", ko:"신경 안 쓰고 바로 전환", m:["vernon","jeonghan","the8"]} ]},
+
+  { ja:"📵 一日だけ誰にも連絡できない日があるとしたら？", ko:"📵 하루만 아무에게도 연락 못 하는 날이 있다면?",
+    o:[ {ja:"むしろ気楽", ko:"오히려 홀가분하다", m:["wonwoo","woozi","the8","joshua","vernon"]},
+        {ja:"少し不安になる", ko:"조금 불안해진다", m:["hoshi","dk","seungkwan","dino"]},
+        {ja:"大事な人が何してるかは気になる", ko:"소중한 사람이 뭐 하는지는 궁금하다", m:["scoups"]},
+        {ja:"何をしようかワクワクする", ko:"뭘 할까 설렌다", m:["jeonghan","jun","mingyu"]} ]},
+
+  { ja:"🍀 一番大事にしている価値観は？", ko:"🍀 가장 소중히 여기는 가치관은?",
+    o:[ {ja:"誠実さ・責任感", ko:"성실함·책임감", m:["scoups","hoshi","woozi","wonwoo"]},
+        {ja:"自由・自分らしさ", ko:"자유·나다움", m:["vernon","jun","the8"]},
+        {ja:"思いやり・人との絆", ko:"배려·사람과의 유대", m:["mingyu","dino","seungkwan"]},
+        {ja:"楽しさ・面白さ", ko:"즐거움·재미", m:["dk","jeonghan","joshua"]} ]},
+
+  { ja:"🎁 プレゼントを選ぶとき、一番重要なのは？", ko:"🎁 선물을 고를 때 가장 중요한 건?",
+    o:[ {ja:"実用的かどうか", ko:"실용적인지", m:["scoups","jeonghan","woozi"]},
+        {ja:"相手が喜びそうか", ko:"상대가 좋아할지", m:["joshua","wonwoo","dk","dino"]},
+        {ja:"サプライズ性", ko:"서프라이즈 요소", m:["hoshi","jun","mingyu","seungkwan"]},
+        {ja:"デザイン性", ko:"디자인", m:["the8","vernon"]} ]},
+
+  { ja:"📞 親しい人から「今電話できる？」と連絡が来た。", ko:"📞 친한 사람에게 '지금 통화 돼?' 하고 연락이 왔다.",
+    o:[ {ja:"何か悩んでる？", ko:"뭔가 고민 있나?", m:["scoups","wonwoo","the8","dk"]},
+        {ja:"何かやらかしたかな", ko:"내가 뭘 잘못했나", m:["joshua","hoshi","woozi","seungkwan","dino"]},
+        {ja:"なんだろ？面白い話かな？", ko:"뭐지? 재밌는 얘기인가?", m:["jeonghan","jun","mingyu"]},
+        {ja:"先に用件を聞いてから電話する", ko:"먼저 용건을 묻고 나서 통화한다", m:["vernon"]} ]},
+];
+
+/* ---------- UI text ---------- */
+const T = {
+  ja:{
+    kicker:"SEVENTEEN 相性診断",
+    h1a:"あなたに一番似ている", h1g:"SEVENTEENメンバー", h1b:"は？",
+    lead:"いくつかの質問に答えるだけでOK。<br>あなたの選択の傾向が一番近いメンバーを診断します。<br><small>※GOING SEVENTEEN『너 자신을 알라』#1＆#2 の内容を元に作成しました。<br>※本診断の結果は娯楽を目的としたもので、医学的・心理学的な診断を意図したものではありません。</small>",
+    tags:["メンバー投票制","相性ランキング付き","日本語／한국어"],
+    start:"診断をはじめる",
+    q:"問", of:"／", back:"前の質問へ",
+    resultMatch:"BEST MATCH",
+    rankHead:"似ているメンバー",
+    retry:"もう一度診断する",
+    share:"結果はスクショで共有できます",
+    foot:"",
+    similar:"番組では",
+  },
+  ko:{
+    kicker:"SEVENTEEN 궁합 진단",
+    h1a:"당신과 가장 닮은", h1g:"세븐틴 멤버", h1b:"는?",
+    lead:"몇 가지 질문에 답하면 끝!<br>당신의 선택 성향이 가장 가까운 멤버를 진단합니다.<br><small>※고잉 세븐틴 『너 자신을 알라』 #1＆#2 내용을 바탕으로 제작했습니다.<br>※본 진단 결과는 오락을 목적으로 하며, 의학적·심리학적 진단을 의도한 것이 아닙니다.</small>",
+    tags:["멤버 투표제","궁합 랭킹 포함","日本語／한국어"],
+    start:"진단 시작하기",
+    q:"문항", of:"／", back:"이전 질문으로",
+    resultMatch:"BEST MATCH",
+    rankHead:"닮은 멤버",
+    retry:"다시 진단하기",
+    share:"결과는 캡처해서 공유할 수 있어요",
+    foot:"",
+    similar:"방송에서는",
+  }
+};
+
+/* ---------- state ---------- */
+let lang = "ja";
+let step = -1;            // -1 intro, 0..n-1 questions, n result
+let votes = {};
+let history = [];         // 回答した選択肢を順に記録（戻る用）
+const card = document.getElementById("card");
+const foot = document.getElementById("foot");
+
+function resetScores(){ votes={}; history=[]; MEMBERS.forEach(m=> votes[m.id]=0); }
+
+function setLang(l){
+  lang=l;
+  document.getElementById("lang-ja").classList.toggle("on", l==="ja");
+  document.getElementById("lang-ko").classList.toggle("on", l==="ko");
+  render();
+}
+
+function startQuiz(){ resetScores(); step=0; render(); }
+
+function answer(opt){
+  history.push(opt);
+  (opt.m||[]).forEach(id=>{ if(votes[id]!=null) votes[id]++; });
+  step++;
+  render();
+}
+
+function goBack(){
+  if(step<=0){ step=-1; render(); return; }   // 最初の問題 → イントロへ
+  step--;
+  const prev=history.pop();
+  if(prev){ (prev.m||[]).forEach(id=>{ if(votes[id]!=null) votes[id]--; }); }
+  render();
+}
+
+function ranked(){
+  const total=QUESTIONS.length;
+  return MEMBERS
+    .map((m,i)=>({ m, v:votes[m.id], pct:Math.round(votes[m.id]/total*100), i }))
+    .sort((a,b)=> b.v-a.v || a.i-b.i );
+}
+
+/* ---------- render ---------- */
+function _rgb(hex){const n=parseInt(hex.slice(1),16);return[n>>16&255,n>>8&255,n&255];}
+function _hex(r,g,b){return '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');}
+// メンバー代表色を紙色(#f1ede2)と混ぜ、淡くトーンを整えた背景色を作る
+function softTint(hex){const [r,g,b]=_rgb(hex),[pr,pg,pb]=_rgb('#f1ede2'),k=0.80;return _hex(r*(1-k)+pr*k, g*(1-k)+pg*k, b*(1-k)+pb*k);}
+// 写真の平均色を抽出（file://でcanvasが読めない場合はnullを返しフォールバック）
+function extractColor(src, cb){
+  const img=new Image();
+  img.onload=function(){
+    try{
+      const s=20, c=document.createElement('canvas'); c.width=s; c.height=s;
+      const x=c.getContext('2d'); x.drawImage(img,0,0,s,s);
+      const d=x.getImageData(0,0,s,s).data;
+      let r=0,g=0,b=0,n=0;
+      for(let i=0;i<d.length;i+=4){ if(d[i+3]<128) continue; r+=d[i]; g+=d[i+1]; b+=d[i+2]; n++; }
+      if(n){ cb(_hex(r/n,g/n,b/n)); return; }
+    }catch(e){}
+    cb(null);
+  };
+  img.onerror=function(){ cb(null); };
+  img.src=src;
+}
+
+function render(){
+  const t=T[lang];
+  const isResult = step>=QUESTIONS.length;
+  foot.textContent = isResult ? t.foot : "";
+  document.body.style.background = isResult ? softTint(ranked()[0].m.color) : "";
+  if(step===-1){ renderIntro(t); return; }
+  if(step<QUESTIONS.length){ renderQuestion(t); return; }
+  renderResult(t);
+}
+
+function renderIntro(t){
+  card.innerHTML=`
+    <h1>${t.h1a}<br><span class="g">${t.h1g}</span>${t.h1b}</h1>
+    <p class="lead">${t.lead}</p>
+    <button class="btn" onclick="startQuiz()">${t.start}</button>
+  `;
+}
+
+function renderQuestion(t){
+  const q=QUESTIONS[step];
+  const pct=Math.round((step/QUESTIONS.length)*100);
+  const hasImg=q.o.some(o=>o.img);
+  const optsHtml = hasImg
+    ? `<div class="imgopts">`+q.o.map((o,i)=>`<button class="imgopt" data-i="${i}"><img src="${encodeURI(o.img)}" alt="" loading="lazy"><span>${o[lang]}</span></button>`).join("")+`</div>`
+    : `<div class="opts">`+q.o.map((o,i)=>`<button class="opt" data-i="${i}">${o[lang]}</button>`).join("")+`</div>`;
+  card.innerHTML=`
+    <button class="back" onclick="goBack()">${t.back}</button>
+    <div class="prog"><i style="width:${pct}%; --p:${pct}"></i></div>
+    <div class="qcount">${step+1} ${t.of} ${QUESTIONS.length}</div>
+    <div class="qtext">${q[lang]}</div>
+    ${optsHtml}
+  `;
+  card.querySelectorAll(".opt,.imgopt").forEach(b=>{
+    b.onclick=()=> answer(q.o[+b.dataset.i]);
+  });
+}
+
+function renderResult(t){
+  const r=ranked();
+  const top=r[0];
+  const maxPct=Math.max(1, r[0].pct);
+
+  const rankHtml = r.slice(0,3).map((x,idx)=>{
+    const w = Math.round((x.pct/maxPct)*100);
+    return `<div class="rankrow ${idx===0?'top':''}">
+      <div class="rk">${idx+1}</div>
+      <div class="rn">${x.m.name}</div>
+      <div class="rb"><i style="width:${w}%;background:${x.m.color}"></i></div>
+      <div class="rp">${x.pct}%</div>
+    </div>`;
+  }).join("");
+
+  card.innerHTML=`
+    <div class="rface" style="background:${top.m.color}">${top.m.init}<img src="${encodeURI(top.m.id)}.jpg" alt="" onerror="this.remove()"></div>
+    <div class="rmatch">${t.resultMatch} · ${top.pct}%</div>
+    <div class="rname">${top.m.name}</div>
+    <div class="rtitle">${top.m.title[lang]}</div>
+    <div class="rpct"></div>
+    <div class="rdesc">${top.m.desc[lang]}</div>
+    <div class="subhead">${t.rankHead}</div>
+    <div class="rank">${rankHtml}</div>
+    <button class="btn ghost" onclick="startQuiz()">${t.retry}</button>
+  `;
+  // 可能なら写真から色を抽出して背景を更新（不可なら代表色のまま）
+  extractColor(encodeURI(top.m.id)+'.jpg', function(c){
+    if(c && step>=QUESTIONS.length && ranked()[0].m.id===top.m.id){
+      document.body.style.background = softTint(c);
+    }
+  });
+}
+
+render();
+</script>
+</body>
+</html>
