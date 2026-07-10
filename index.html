@@ -107,7 +107,15 @@
   .rname{text-align:center; font-size:29px; font-weight:800; letter-spacing:-.01em; margin:2px 0 4px}
   .rtitle{text-align:center; font-size:13px; font-weight:800; color:var(--ink); margin-bottom:20px}
   .rdesc{font-size:13px; line-height:1.9; color:#37342c; background:#f4eee1; border:1.5px solid var(--ink); padding:13px 15px; margin-bottom:22px}
-  .rhit{text-align:center; font-size:12px; font-weight:800; color:var(--accent); border:1.5px solid var(--accent); padding:6px 10px; margin:2px 0 18px}
+  .rhit{text-align:center; font-size:10.5px; font-weight:800; color:var(--accent); margin:0 0 2px; line-height:1.4}
+  .tabs{display:flex; margin-bottom:12px}
+  .tab{flex:1; border:1.5px solid var(--ink); background:var(--card); color:var(--ink-soft); font-size:12.5px; font-weight:800; padding:8px; cursor:pointer; transition:.12s}
+  .tab + .tab{border-left:none}
+  .tab.on{background:var(--ink); color:var(--paper)}
+  .tlist{list-style:none; margin:0 0 22px; padding:0}
+  .tlist li{position:relative; font-size:12.5px; font-weight:600; color:#3a372f; padding:7px 0 7px 16px; border-bottom:1px dashed rgba(28,27,24,.2)}
+  .tlist li:last-child{border-bottom:none}
+  .tlist li::before{content:"—"; position:absolute; left:0; color:var(--accent); font-weight:800}
   .rshare{text-align:center; font-size:12.5px; font-weight:800; color:var(--accent); cursor:pointer; padding:8px; user-select:none; text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1.5px}
   .rshare.done{color:var(--ink-soft); text-decoration:none}
 
@@ -291,6 +299,36 @@ const MEMBER_AXES = {
   dk:[68,88,70,15], seungkwan:[55,90,88,58], vernon:[88,30,35,40], dino:[45,60,50,60],
 };
 
+/* ---- 傾向分析：得意なこと / 苦手なこと（タブ表示） ---- */
+const MEMBER_TRAITS = {
+  scoups:{ good:{ja:["人をまとめて引っ張る","包容力で人を惹きつける","物事を深く考える"], ko:["사람들을 이끌기","포용력으로 끌어당기기","깊이 생각하기"]},
+           weak:{ja:["パッとすぐ動き出すこと","地道にコツコツ続けること","自分をしっかりほめること"], ko:["곧바로 움직이기","꾸준히 이어가기","자신을 칭찬해 주기"]} },
+  jeonghan:{ good:{ja:["冗談で場を和ませる","絶妙なバランス感覚","状況を読んだ立ち回り"], ko:["농담으로 분위기 풀기","절묘한 균형 감각","상황을 읽는 처신"]},
+             weak:{ja:["地道にコツコツ続けること","違う考えに歩み寄ること","本音をそのまま見せること"], ko:["꾸준히 이어가기","다른 생각에 다가가기","속마음 그대로 보여주기"]} },
+  joshua:{ good:{ja:["独創的なアイデア","人付き合い・場づくり","着実に努力する"], ko:["독창적인 아이디어","사람들과 어울리기","착실하게 노력하기"]},
+           weak:{ja:["感情のペースを一定に保つこと","ゆっくり地に足をつけること","一人の時間を長く過ごすこと"], ko:["감정 페이스 유지하기","차분히 균형 잡기","혼자 오래 보내기"]} },
+  jun:{ good:{ja:["大胆な挑戦","初対面でも臆さない","新しい変化に飛び込む"], ko:["대담한 도전","초면에도 스스럼없이","새로운 변화에 뛰어들기"]},
+        weak:{ja:["じっくり深く共感すること","同じことを長く続けること","違う考えに歩み寄ること"], ko:["깊이 공감하기","같은 일 오래 하기","다른 생각에 다가가기"]} },
+  hoshi:{ good:{ja:["目標を必ずやり遂げる","情熱で人を引っ張る","責任を担う"], ko:["목표를 끝까지 해내기","열정으로 이끌기","책임 맡기"]},
+          weak:{ja:["ときどき肩の力を抜くこと","感情のペースを保つこと","ひとに任せて見守ること"], ko:["가끔 힘 빼기","감정 페이스 유지하기","남에게 맡기고 지켜보기"]} },
+  wonwoo:{ good:{ja:["慎重な判断","深く考える知性","心を許した人への誠実さ"], ko:["신중한 판단","깊이 생각하는 지성","마음 연 사람에게 진심"]},
+           weak:{ja:["打ち解けるまでのウォームアップ","気前よく譲ること","考えすぎず気楽に構えること"], ko:["친해지기까지 워밍업","선뜻 양보하기","너무 깊이 생각 안 하기"]} },
+  woozi:{ good:{ja:["完璧な仕上げ","細部へのこだわり","一人で突き詰める集中力"], ko:["완벽한 마무리","디테일 집착","혼자 파고드는 집중력"]},
+          weak:{ja:["ほどよく力を抜くこと","ひとに任せること","切り替えて水に流すこと"], ko:["적당히 힘 빼기","남에게 맡기기","훌훌 털어내기"]} },
+  the8:{ good:{ja:["独創的な表現","自分にも他人にも高い基準","動じない安定感"], ko:["독창적인 표현","높은 기준","흔들리지 않는 안정감"]},
+         weak:{ja:["自分の世界とのバランス","感覚を言葉にして伝えること","地に足をつけて見せること"], ko:["자기 세계와 균형 잡기","감각을 말로 전하기","현실감 있게 보이기"]} },
+  mingyu:{ good:{ja:["周りへの気配り","フットワークの軽さ","明るく良い関係を作る"], ko:["주변 배려","가벼운 실행력","밝게 좋은 관계 만들기"]},
+           weak:{ja:["自分のことも優先すること","ときには断ること","のびのび自由でいること"], ko:["자신도 우선하기","가끔은 거절하기","자유롭게 지내기"]} },
+  dk:{ good:{ja:["豊かな想像力","ポジティブさ","直感的なひらめき"], ko:["풍부한 상상력","긍정 에너지","직감적인 번뜩임"]},
+       weak:{ja:["筋道立てて考えること","地道にコツコツ進めること","アイデアを形にすること"], ko:["차근차근 생각하기","꾸준히 진행하기","아이디어를 형태로 만들기"]} },
+  seungkwan:{ good:{ja:["空気を読む","ユーモアで場を沸かす","バランス感覚"], ko:["눈치 보기","유머로 분위기 띄우기","균형 감각"]},
+              weak:{ja:["長期目標をコツコツ続けること","素の自分を見せること","自分の本音を出すこと"], ko:["장기 목표 이어가기","솔직한 모습 보이기","속마음 드러내기"]} },
+  vernon:{ good:{ja:["自分の信念を貫く","鋭い観察眼","迷わない行動力"], ko:["신념을 밀고 나가기","예리한 관찰력","망설임 없는 행동력"]},
+           weak:{ja:["感情をやわらかく表に出すこと","じっくり深く共感すること","周りとペースを合わせること"], ko:["감정을 부드럽게 표현하기","깊이 공감하기","주변과 페이스 맞추기"]} },
+  dino:{ good:{ja:["人への共感・優しさ","寛大さ","慎重な行動"], ko:["공감과 다정함","관대함","신중한 행동"]},
+         weak:{ja:["迷わずパッと動くこと","断られても引きずらないこと","もっと自分を優先すること"], ko:["망설임 없이 나서기","거절에 담담해지기","자신을 더 우선하기"]} },
+};
+
 /* ---- 質問。各選択肢 m:[] に「その選択肢を選びそうなメンバーid」を入れる ---- */
 const QUESTIONS = [
   { ja:"💘 どんな人が好き？", ko:"💘 어떤 사람이 좋아?",
@@ -426,6 +464,7 @@ const T = {
     q:"問", of:"／", back:"前の質問へ",
     resultMatch:"＜BEST MATCH＞",
     rankHead:"似ているメンバー",
+    traitHead:"傾向分析", good:"得意なこと", weak:"苦手なこと",
     styleHead:"タイプ傾向", you:"あなた",
     hit:function(name,n){ return name+"と90%以上一致したのは あなたで "+n+"人目！"; },
     copied:"URLをコピーしました！",
@@ -444,6 +483,7 @@ const T = {
     q:"문항", of:"／", back:"이전 질문으로",
     resultMatch:"＜BEST MATCH＞",
     rankHead:"닮은 멤버",
+    traitHead:"성향 분석", good:"잘하는 것", weak:"어려워하는 것",
     styleHead:"성향", you:"나",
     hit:function(name,n){ return name+"님과 90% 이상 일치한 건 당신이 "+n+"번째!"; },
     copied:"URL을 복사했어요!",
@@ -494,6 +534,14 @@ function copyUrl(){
 }
 function legacyCopy(text, ok){
   try{ var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); ok(); }catch(e){}
+}
+
+// 傾向分析タブ切替
+function setTab(t){
+  var tabs=document.querySelectorAll('.tab');
+  for(var i=0;i<tabs.length;i++) tabs[i].classList.toggle('on', tabs[i].getAttribute('data-t')===t);
+  var ls=document.querySelectorAll('.tlist');
+  for(var j=0;j<ls.length;j++) ls[j].style.display = (ls[j].getAttribute('data-t')===t) ? '' : 'none';
 }
 
 function answer(opt){
@@ -610,6 +658,15 @@ function renderResult(t){
     + `<div class="axleg"><span class="sw sw-m"></span>${top.m.name}<span class="sw sw-u"></span>${t.you}</div>`
     + `<div class="axes2">${axisHtml}</div>`;
 
+  // 傾向分析（得意なこと / 苦手なこと）タブ
+  const tr = MEMBER_TRAITS[top.m.id];
+  const analysisHtml = tr
+    ? `<div class="subhead">${t.traitHead}</div>`
+      + `<div class="tabs"><button class="tab on" data-t="good" onclick="setTab('good')">${t.good}</button><button class="tab" data-t="weak" onclick="setTab('weak')">${t.weak}</button></div>`
+      + `<ul class="tlist" data-t="good">${tr.good[lang].map(x=>`<li>${x}</li>`).join("")}</ul>`
+      + `<ul class="tlist" data-t="weak" style="display:none">${tr.weak[lang].map(x=>`<li>${x}</li>`).join("")}</ul>`
+    : "";
+
   // 90%以上一致カウンター（top.pct>=90 のときだけ表示）
   const hitCached = hitState && hitState.id===top.m.id;
   const hitHtml = top.pct>=90
@@ -620,13 +677,14 @@ function renderResult(t){
     <div class="rmatch">${t.resultMatch}</div>
     <div class="rface" style="background:${top.m.color}">${top.m.init}<img src="${encodeURI(top.m.id)}.jpg" alt="" onerror="this.remove()"></div>
     <div class="rpct">${top.pct}%</div>
+    ${hitHtml}
     <div class="rname">${top.m.name}</div>
     <div class="rtitle">${top.m.title[lang]}</div>
-    ${hitHtml}
     <div class="rdesc">${top.m.desc[lang]}</div>
     ${styleHtml}
     <div class="subhead">${t.rankHead}</div>
     <div class="rank">${rankHtml}</div>
+    ${analysisHtml}
     <div class="rshare" id="rshare" onclick="copyUrl()">${t.share}</div>
     <button class="btn ghost" onclick="startQuiz()">${t.retry}</button>
   `;
