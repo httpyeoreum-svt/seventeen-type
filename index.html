@@ -162,12 +162,12 @@
   .modal{position:fixed; inset:0; background:rgba(28,27,24,.55); display:none; align-items:center; justify-content:center; padding:20px; z-index:50; opacity:0; transition:opacity .18s}
   .modal.on{display:flex}
   .modal.show{opacity:1}
-  .mbox{background:var(--card); border:1.5px solid var(--ink); box-shadow:8px 8px 0 var(--ink); width:100%; max-width:440px; max-height:80vh; display:flex; flex-direction:column}
+  .mbox{background:var(--card); border:1.5px solid var(--ink); box-shadow:8px 8px 0 var(--ink); width:100%; max-width:440px; height:min(72vh, 520px); display:flex; flex-direction:column}   /* 高さ固定・本文のみスクロール */
   .mhead{display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1.5px solid var(--ink)}
   .mhead h2{font-size:14px; font-weight:800; letter-spacing:.12em}
   .mclose{border:1.5px solid var(--ink); background:var(--card); color:var(--ink); width:30px; height:30px; font-size:16px; font-weight:800; line-height:1; cursor:pointer; transition:.12s}
   .mclose:hover{background:var(--ink); color:var(--paper)}
-  .mbody{padding:16px 20px 20px; overflow-y:auto; font-size:12.5px; line-height:1.8}
+  .mbody{flex:1; min-height:0; padding:16px 20px 20px; overflow-y:auto; font-size:12.5px; line-height:1.8}
   .mlog + .mlog{margin-top:14px; padding-top:14px; border-top:1px dashed #cfc7b6}
   .mlog .md{font-size:11px; font-weight:800; color:var(--accent); letter-spacing:.1em; margin-bottom:4px}
   .mlog ul{padding-left:18px; color:#37342c}
@@ -491,8 +491,8 @@ const QUESTIONS = [
 /* ---------- 更新履歴（新しい順） ---------- */
 const CHANGELOG = [
   { date:"2026.09.19",
-    ja:["結果の判定ロジックを調整（同率時の決着ルール、一致率の算出見直し）","一部の選択肢のメンバー割り振りを見直し","S.COUPS の説明文を更新","更新履歴を追加"],
-    ko:["결과 판정 로직 조정 (동률 시 결정 규칙, 일치율 산출 방식 개선)","일부 선택지의 멤버 배정 조정","에스쿱스 설명문 업데이트","업데이트 내역 추가"] },
+    ja:["結果の判定ロジックを調整（同率時の決着ルール、一致率の算出見直し、選択肢のメンバー割り振り）","結果画面の表示を刷新（似ているメンバーのゲージに伸びるモーション、90%以上一致をレアマッチバッジに）","S.COUPS の説明文を更新","更新履歴を追加（モーダル表示・高さ固定）"],
+    ko:["결과 판정 로직 조정 (동률 시 결정 규칙, 일치율 산출 방식 개선, 선택지의 멤버 배정)","결과 화면 표시 개편 (닮은 멤버 게이지에 늘어나는 모션, 90% 이상 일치를 레어 매치 배지로)","에스쿱스 설명문 업데이트","업데이트 내역 추가 (모달 표시·높이 고정)"] },
   { date:"2026.07.10",
     ja:["公開","傾向分析タブ（得意なこと / 苦手なこと）","メンバー別 90%以上一致カウンター","友達にシェア（URLコピー）","タイプ傾向 4軸であなたとメンバーを比較"],
     ko:["공개","성향 분석 탭 (잘하는 것 / 어려운 것)","멤버별 90% 이상 일치 카운터","친구에게 공유 (URL 복사)","타입 성향 4축으로 나와 멤버 비교"] },
