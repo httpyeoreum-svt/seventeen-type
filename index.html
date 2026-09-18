@@ -107,7 +107,16 @@
   .rname{text-align:center; font-size:29px; font-weight:800; letter-spacing:-.01em; margin:2px 0 4px}
   .rtitle{text-align:center; font-size:13px; font-weight:800; color:var(--ink); margin-bottom:20px}
   .rdesc{font-size:13px; line-height:1.9; color:#37342c; background:#f4eee1; border:1.5px solid var(--ink); padding:13px 15px; margin-bottom:22px}
-  .rhit{text-align:center; font-size:10.5px; font-weight:800; color:var(--accent); margin:0 0 2px; line-height:1.4}
+  /* 90%以上一致バッジ（レアマッチ） */
+  .rhit{display:block; width:fit-content; max-width:100%; margin:6px auto 4px; padding:9px 16px 10px; text-align:center;
+    border:1.5px solid var(--accent); background:#fbeaef; box-shadow:3px 3px 0 var(--accent);
+    animation:rhitPop .45s cubic-bezier(.2,.9,.3,1.2) both}
+  .rhit .hk{font-size:9.5px; font-weight:800; letter-spacing:.28em; color:var(--accent); text-transform:uppercase; margin-bottom:3px}
+  .rhit .h1{font-size:12.5px; font-weight:800; color:var(--ink); line-height:1.5}
+  .rhit .h2{font-size:11px; font-weight:700; color:var(--ink-soft); line-height:1.6; margin-top:2px}
+  .rhit .h2 b{color:var(--accent)}
+  @keyframes rhitPop{ from{opacity:0; transform:scale(1.12)} to{opacity:1; transform:scale(1)} }
+  @media (prefers-reduced-motion:reduce){ .rhit{animation:none} }
   .tabs{display:flex; margin-bottom:12px}
   .tab{flex:1; border:1.5px solid var(--ink); background:var(--card); color:var(--ink-soft); font-size:12.5px; font-weight:800; padding:8px; cursor:pointer; transition:.12s}
   .tab + .tab{border-left:none}
@@ -137,7 +146,9 @@
   .rankrow .rk{font-size:12px; font-weight:800; color:#bcb3a1; text-align:center}
   .rankrow .rn{font-size:12.5px; font-weight:800; color:var(--ink); white-space:nowrap}
   .rankrow .rb{height:13px; background:var(--track); border:1.5px solid var(--ink); overflow:hidden}
-  .rankrow .rb i{display:block; height:100%}
+  .rankrow .rb i{display:block; height:100%; width:0; animation:rbGrow .9s cubic-bezier(.22,.8,.3,1) forwards}   /* 左→右に伸びて止まる（1回のみ） */
+  @keyframes rbGrow{ to{ width:var(--w) } }
+  @media (prefers-reduced-motion:reduce){ .rankrow .rb i{animation:none; width:var(--w)} }
   .rankrow .rp{font-size:12px; font-weight:800; color:var(--ink-soft); text-align:right}
   .rankrow.top .rn{color:var(--accent)}
   .rankrow.top .rk{color:var(--accent)}
@@ -501,7 +512,12 @@ const T = {
     rankHead:"似ているメンバー",
     traitHead:"傾向分析", good:"得意なこと", weak:"苦手なこと",
     styleHead:"タイプ傾向", you:"あなた",
-    hit:function(name,n){ return name+"と90%以上一致したのは あなたで "+n+"人目！"; },
+    hit:function(name,n){
+      var line = n===1 ? "この記録を出したのは、<b>あなたが世界で初めて</b>。"
+               : n<=50 ? "この記録を出したのは、これまでにたった<b>"+n+"人</b>。あなたはその<b>"+n+"人目</b>。"
+               :         "この記録を出したのは、これまでに<b>"+n+"人</b>。あなたはその<b>"+n+"人目</b>。";
+      return '<div class="hk">✦ Rare Match ✦</div><div class="h1">'+name+'と 90%以上 一致</div><div class="h2">'+line+'</div>';
+    },
     copied:"URLをコピーしました！",
     retry:"もう一度診断する",
     share:"友達にシェアする（タップでURLコピー）",
@@ -521,7 +537,12 @@ const T = {
     rankHead:"닮은 멤버",
     traitHead:"성향 분석", good:"잘하는 것", weak:"어려워하는 것",
     styleHead:"성향", you:"나",
-    hit:function(name,n){ return name+"님과 90% 이상 일치한 건 당신이 "+n+"번째!"; },
+    hit:function(name,n){
+      var line = n===1 ? "이 기록을 낸 사람은 <b>당신이 세계 최초</b>."
+               : n<=50 ? "이 기록을 낸 사람은 지금까지 단 <b>"+n+"명</b>. 당신이 그 <b>"+n+"번째</b>."
+               :         "이 기록을 낸 사람은 지금까지 <b>"+n+"명</b>. 당신이 그 <b>"+n+"번째</b>.";
+      return '<div class="hk">✦ Rare Match ✦</div><div class="h1">'+name+'님과 90% 이상 일치</div><div class="h2">'+line+'</div>';
+    },
     copied:"URL을 복사했어요!",
     retry:"다시 진단하기",
     share:"친구에게 공유하기 (탭하면 URL 복사)",
@@ -695,7 +716,7 @@ function renderResult(t){
     return `<div class="rankrow ${idx===0?'top':''}">
       <div class="rk">${idx+1}</div>
       <div class="rn">${x.m.name}</div>
-      <div class="rb"><i style="width:${x.pct}%;background:${x.m.color}"></i></div>
+      <div class="rb"><i style="--w:${x.pct}%;background:${x.m.color};animation-delay:${idx*0.12}s"></i></div>
       <div class="rp">${x.pct}%</div>
     </div>`;
   }).join("");
