@@ -143,6 +143,23 @@
   .rankrow.top .rk{color:var(--accent)}
 
   .foot{text-align:center; font-size:10.5px; color:#a49d8e; margin-top:18px; line-height:1.7}
+  .siteft{text-align:center; margin-top:22px}
+  .siteft a{font-size:11px; font-weight:700; color:#a49d8e; text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px; cursor:pointer; letter-spacing:.06em}
+  .siteft a:hover{color:var(--accent)}
+
+  /* ---- 更新履歴モーダル ---- */
+  .modal{position:fixed; inset:0; background:rgba(28,27,24,.55); display:none; align-items:center; justify-content:center; padding:20px; z-index:50; opacity:0; transition:opacity .18s}
+  .modal.on{display:flex}
+  .modal.show{opacity:1}
+  .mbox{background:var(--card); border:1.5px solid var(--ink); box-shadow:8px 8px 0 var(--ink); width:100%; max-width:440px; max-height:80vh; display:flex; flex-direction:column}
+  .mhead{display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1.5px solid var(--ink)}
+  .mhead h2{font-size:14px; font-weight:800; letter-spacing:.12em}
+  .mclose{border:1.5px solid var(--ink); background:var(--card); color:var(--ink); width:30px; height:30px; font-size:16px; font-weight:800; line-height:1; cursor:pointer; transition:.12s}
+  .mclose:hover{background:var(--ink); color:var(--paper)}
+  .mbody{padding:16px 20px 20px; overflow-y:auto; font-size:12.5px; line-height:1.8}
+  .mlog + .mlog{margin-top:14px; padding-top:14px; border-top:1px dashed #cfc7b6}
+  .mlog .md{font-size:11px; font-weight:800; color:var(--accent); letter-spacing:.1em; margin-bottom:4px}
+  .mlog ul{padding-left:18px; color:#37342c}
   @media(max-width:480px){
     .card{padding:26px 20px; box-shadow:6px 6px 0 var(--ink)}
     h1{font-size:25px}
@@ -160,6 +177,14 @@
   </div>
   <div class="card" id="card"></div>
   <div class="foot" id="foot"></div>
+  <div class="siteft"><a id="logbtn" onclick="openLog()"></a></div>
+</div>
+
+<div class="modal" id="modal" onclick="if(event.target===this) closeLog()">
+  <div class="mbox" role="dialog" aria-modal="true">
+    <div class="mhead"><h2 id="mtitle"></h2><button class="mclose" onclick="closeLog()" aria-label="close">×</button></div>
+    <div class="mbody" id="mbody"></div>
+  </div>
 </div>
 
 <script>
@@ -175,8 +200,8 @@ const MEMBERS = [
   { id:"scoups", color:"#e4788f", init:"SC", name:"S.COUPS",
     title:{ja:"沈思黙考の努力家リーダー", ko:"심사숙고하는 노력파 리더"},
     sim:{ja:"気質が <b>DK・SEUNGKWAN</b> と同じ", ko:"기질이 <b>도겸·승관</b>과 같음"},
-    desc:{ja:"繊細に感情をキャッチする、感受性豊かなタイプ。興味はあってもすぐ動かず、じっくり考える沈思黙考派。礼儀正しく、自分も周りも高めたい上昇志向。頼られれば自分を後回しにしてでも動く、リーダー向きの寛大さ。達成しても満足しきれない、努力家の完璧主義。",
-        ko:"섬세하게 감정을 캐치하는, 감수성 풍부한 타입. 관심은 있어도 바로 움직이지 않고 곰곰이 생각하는 심사숙고파. 예의 바르고, 나도 주변도 끌어올리고 싶은 상승 지향. 기대오면 자신을 뒤로 미루고 움직이는, 리더형 너그러움. 이뤄내도 스스로는 만족 못 하는 노력파의 완벽주의."} },
+    desc:{ja:"周りからはしっかりとしていて頼もしい印象を受けるが、実は感受性豊かなタイプ。興味があってもすぐ動かず、じっくり考える沈思黙考派。常に礼儀正しく、信頼性を重視する性格。誰かに頼られた時は自分を後回しにしてでも動く、リーダー向きの寛大さがある。目標を達成しても満足しきれない、努力家の完璧主義な一面も持ち合わせている。",
+        ko:"주변에서는 야무지고 듬직한 인상을 받지만, 사실은 감수성이 풍부한 타입. 관심이 있어도 바로 움직이지 않고 곰곰이 생각하는 심사숙고파. 늘 예의 바르고, 신뢰성을 중시하는 성격. 누군가 기대올 땐 자신을 뒤로 미루더라도 움직이는, 리더에 어울리는 너그러움이 있다. 목표를 이뤄내도 만족하지 못하는, 노력파의 완벽주의적인 면도 지니고 있다."} },
 
   { id:"jeonghan", color:"#c98bd6", init:"JH", name:"JEONGHAN",
     title:{ja:"気まぐれマルチーズ", ko:"변덕쟁이 말티즈"}, sim:null,
@@ -344,8 +369,8 @@ const QUESTIONS = [
         {ja:"のんびり育成ゲーム", ko:"느긋한 육성 게임", m:["joshua","dino","jun"], img:"animal game.jpg"} ]},
 
   { ja:"🏖️ 理想の休日は？", ko:"🏖️ 이상적인 휴일은?",
-    o:[ {ja:"友人と浜辺でBBQ！", ko:"친구들과 해변에서 바비큐!", m:["hoshi","seungkwan","mingyu","jeonghan"]},
-        {ja:"友達と室内アクティビティ", ko:"친구와 실내 액티비티", m:["scoups","dk"]},
+    o:[ {ja:"友人と浜辺でBBQ！", ko:"친구들과 해변에서 바비큐!", m:["seungkwan","mingyu","jeonghan"]},
+        {ja:"友達と室内アクティビティ", ko:"친구와 실내 액티비티", m:["scoups","dk","hoshi"]},
         {ja:"一人で美術館・映画・カフェでブランチ", ko:"혼자 미술관·영화·카페에서 브런치", m:["the8","dino","vernon","joshua"]},
         {ja:"一人でゴロゴロ、家で趣味に没頭", ko:"혼자 뒹굴뒹굴, 집에서 취미에 몰두", m:["woozi","jun","wonwoo"]} ]},
 
@@ -357,9 +382,9 @@ const QUESTIONS = [
 
   { ja:"🌃 久しぶりに夜景を見た。", ko:"🌃 오랜만에 야경을 봤다.",
     o:[ {ja:"こんな時間まで働く人がこんなに…と心を痛める", ko:"이 시간까지 일하는 사람이 이렇게 많다니… 마음이 아파짐", m:["dk","dino"]},
-        {ja:"「綺麗だなー」", ko:"'예쁘다~'", m:["jun","vernon"]},
+        {ja:"「綺麗だなー」", ko:"'예쁘다~'", m:["jun","vernon","hoshi"]},
         {ja:"映える位置を探して何枚か撮る", ko:"잘 나오는 위치를 찾아 몇 장 찍음", m:["scoups","wonwoo","the8","joshua"]},
-        {ja:"「あの人たちカップル？」と周りが気になる", ko:"'저 사람들 커플인가?' 하고 주변이 궁금해짐", m:["seungkwan","mingyu","jeonghan","hoshi","woozi"]} ]},
+        {ja:"「あの人たちカップル？」と周りが気になる", ko:"'저 사람들 커플인가?' 하고 주변이 궁금해짐", m:["seungkwan","mingyu","jeonghan","woozi"]} ]},
 
   { ja:"✈️ 旅行に行くなら、どんなプラン？", ko:"✈️ 여행을 간다면 어떤 플랜?",
     o:[ {ja:"ある程度計画をしっかり！", ko:"어느 정도 계획은 확실히!", m:["woozi","wonwoo","scoups"]},
@@ -380,10 +405,10 @@ const QUESTIONS = [
         {ja:"話を振られたらそれなりに話してみる", ko:"말을 걸어오면 나름대로 이야기해본다", m:["the8","joshua","jun"]} ]},
 
   { ja:"💰 臨時収入が入った！何に使う？", ko:"💰 뜻밖의 수입이 생겼다! 어디에 쓸까?",
-    o:[ {ja:"欲しかったものを即買い", ko:"갖고 싶던 걸 바로 구매", m:["jun","hoshi","vernon"]},
+    o:[ {ja:"欲しかったものを即買い", ko:"갖고 싶던 걸 바로 구매", m:["jun","hoshi"]},
         {ja:"貯金して堅実に管理", ko:"저축하며 알뜰하게 관리", m:["woozi","jeonghan"]},
         {ja:"友達にプレゼント・おごる", ko:"친구에게 선물·한턱", m:["mingyu","dino","seungkwan","wonwoo","scoups"]},
-        {ja:"趣味・自分の世界に投資", ko:"취미·나만의 세계에 투자", m:["the8","joshua","dk"]} ]},
+        {ja:"趣味・自分の世界に投資", ko:"취미·나만의 세계에 투자", m:["the8","joshua","dk","vernon"]} ]},
 
   { ja:"💅 好きなネイルは？", ko:"💅 좋아하는 네일은?",
     o:[ {ja:"フェミニン・ガーリーなワンホンネイル", ko:"페미닌·걸리시한 왕훙 네일", m:["joshua","jeonghan","jun"], img:"pink nail.jpg"},
@@ -428,9 +453,9 @@ const QUESTIONS = [
         {ja:"気にせずすぐ切り替え", ko:"신경 안 쓰고 바로 전환", m:["vernon","jeonghan","the8"]} ]},
 
   { ja:"📵 一日だけ誰にも連絡できない日があるとしたら？", ko:"📵 하루만 아무에게도 연락 못 하는 날이 있다면?",
-    o:[ {ja:"むしろ気楽", ko:"오히려 홀가분하다", m:["wonwoo","woozi","the8","joshua","vernon"]},
+    o:[ {ja:"むしろ気楽", ko:"오히려 홀가분하다", m:["wonwoo","woozi","the8","vernon"]},
         {ja:"少し不安になる", ko:"조금 불안해진다", m:["hoshi","dk","seungkwan","dino"]},
-        {ja:"大事な人が何してるかは気になる", ko:"소중한 사람이 뭐 하는지는 궁금하다", m:["scoups"]},
+        {ja:"大事な人が何してるかは気になる", ko:"소중한 사람이 뭐 하는지는 궁금하다", m:["scoups","joshua"]},
         {ja:"何をしようかワクワクする", ko:"뭘 할까 설렌다", m:["jeonghan","jun","mingyu"]} ]},
 
   { ja:"🍀 一番大事にしている価値観は？", ko:"🍀 가장 소중히 여기는 가치관은?",
@@ -445,11 +470,21 @@ const QUESTIONS = [
         {ja:"サプライズ性", ko:"서프라이즈 요소", m:["hoshi","jun","mingyu","seungkwan"]},
         {ja:"デザイン性", ko:"디자인", m:["the8","vernon"]} ]},
 
-  { ja:"📞 親しい人から「今電話できる？」と連絡が来た。", ko:"📞 친한 사람에게 '지금 통화 돼?' 하고 연락이 왔다.",
+  { ja:"📞 親しい人から「今電話できる？」と連絡が来た。心の中で最初に何を考える？", ko:"📞 친한 사람에게 '지금 통화 돼?' 하고 연락이 왔다. 속으로 제일 먼저 무슨 생각을 해?",
     o:[ {ja:"何か悩んでる？", ko:"뭔가 고민 있나?", m:["scoups","wonwoo","the8","dk"]},
-        {ja:"何かやらかしたかな", ko:"내가 뭘 잘못했나", m:["joshua","hoshi","woozi","seungkwan","dino"]},
+        {ja:"何かやらかしたかな", ko:"내가 뭘 잘못했나", m:["joshua","hoshi","seungkwan","dino"]},
         {ja:"なんだろ？面白い話かな？", ko:"뭐지? 재밌는 얘기인가?", m:["jeonghan","jun","mingyu"]},
-        {ja:"先に用件を聞いてから電話する", ko:"먼저 용건을 묻고 나서 통화한다", m:["vernon"]} ]},
+        {ja:"先に用件を聞いてから電話する", ko:"먼저 용건을 묻고 나서 통화한다", m:["vernon","woozi"]} ]},
+];
+
+/* ---------- 更新履歴（新しい順） ---------- */
+const CHANGELOG = [
+  { date:"2026.09.19",
+    ja:["結果の判定ロジックを調整（同率時の決着ルール、一致率の算出見直し）","一部の選択肢のメンバー割り振りを見直し","S.COUPS の説明文を更新","更新履歴を追加"],
+    ko:["결과 판정 로직 조정 (동률 시 결정 규칙, 일치율 산출 방식 개선)","일부 선택지의 멤버 배정 조정","에스쿱스 설명문 업데이트","업데이트 내역 추가"] },
+  { date:"2026.07.10",
+    ja:["公開","傾向分析タブ（得意なこと / 苦手なこと）","メンバー別 90%以上一致カウンター","友達にシェア（URLコピー）","タイプ傾向 4軸であなたとメンバーを比較"],
+    ko:["공개","성향 분석 탭 (잘하는 것 / 어려운 것)","멤버별 90% 이상 일치 카운터","친구에게 공유 (URL 복사)","타입 성향 4축으로 나와 멤버 비교"] },
 ];
 
 /* ---------- UI text ---------- */
@@ -470,6 +505,7 @@ const T = {
     copied:"URLをコピーしました！",
     retry:"もう一度診断する",
     share:"友達にシェアする（タップでURLコピー）",
+    log:"更新履歴",
     foot:"",
     similar:"番組では",
   },
@@ -489,6 +525,7 @@ const T = {
     copied:"URL을 복사했어요!",
     retry:"다시 진단하기",
     share:"친구에게 공유하기 (탭하면 URL 복사)",
+    log:"업데이트 내역",
     foot:"",
     similar:"방송에서는",
   }
@@ -498,13 +535,16 @@ const T = {
 let lang = "ja";
 let step = -1;            // -1 intro, 0..n-1 questions, n result
 let votes = {};
+let rare = {};            // 同率決着用の希少度スコア（選択肢のメンバー数が少ないほど高い。60/人数 で整数化）
+// クリティカルボーナス: 選択肢のメンバー数が 1人=3pt, 2人=2pt, それ以外=1pt
+function optPts(opt){ const n=(opt.m||[]).length; return n===1?3 : n===2?2 : 1; }
 let history = [];         // 回答した選択肢を順に記録（戻る用）
 let hitState = null;      // {id,n} 90%以上カウンターの取得結果
 let hitBusy = false;
 const card = document.getElementById("card");
 const foot = document.getElementById("foot");
 
-function resetScores(){ votes={}; history=[]; MEMBERS.forEach(m=> votes[m.id]=0); }
+function resetScores(){ votes={}; rare={}; history=[]; MEMBERS.forEach(m=>{ votes[m.id]=0; rare[m.id]=0; }); }
 
 function setLang(l){
   lang=l;
@@ -536,6 +576,22 @@ function legacyCopy(text, ok){
   try{ var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); ok(); }catch(e){}
 }
 
+// 更新履歴モーダル
+function openLog(){
+  const m=document.getElementById('modal');
+  document.getElementById('mtitle').textContent=T[lang].log;
+  document.getElementById('mbody').innerHTML=CHANGELOG.map(c=>
+    `<div class="mlog"><div class="md">${c.date}</div><ul>${c[lang].map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('');
+  m.classList.add('on');
+  requestAnimationFrame(()=>m.classList.add('show'));
+}
+function closeLog(){
+  const m=document.getElementById('modal');
+  m.classList.remove('show');
+  setTimeout(()=>m.classList.remove('on'),180);
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeLog(); });
+
 // 傾向分析タブ切替
 function setTab(t){
   var tabs=document.querySelectorAll('.tab');
@@ -546,7 +602,8 @@ function setTab(t){
 
 function answer(opt){
   history.push(opt);
-  (opt.m||[]).forEach(id=>{ if(votes[id]!=null) votes[id]++; });
+  const w=60/((opt.m||[]).length||1), pts=optPts(opt);
+  (opt.m||[]).forEach(id=>{ if(votes[id]!=null){ votes[id]+=pts; rare[id]+=w; } });
   step++;
   render();
 }
@@ -555,15 +612,15 @@ function goBack(){
   if(step<=0){ step=-1; render(); return; }   // 最初の問題 → イントロへ
   step--;
   const prev=history.pop();
-  if(prev){ (prev.m||[]).forEach(id=>{ if(votes[id]!=null) votes[id]--; }); }
+  if(prev){ const w=60/((prev.m||[]).length||1), pts=optPts(prev); (prev.m||[]).forEach(id=>{ if(votes[id]!=null){ votes[id]-=pts; rare[id]-=w; } }); }
   render();
 }
 
 function ranked(){
   const total=QUESTIONS.length;
   return MEMBERS
-    .map((m,i)=>({ m, v:votes[m.id], pct:Math.round(votes[m.id]/total*100), i }))
-    .sort((a,b)=> b.v-a.v || a.i-b.i );
+    .map((m,i)=>({ m, v:votes[m.id], r:rare[m.id], pct:Math.min(100, Math.round(votes[m.id]/total*100)), i }))   // ボーナス込みなので上限100%
+    .sort((a,b)=> b.v-a.v || b.r-a.r || a.i-b.i );   // 得票 → 希少度 → 配列順
 }
 
 /* ---------- render ---------- */
@@ -593,6 +650,7 @@ function render(){
   const t=T[lang];
   const isResult = step>=QUESTIONS.length;
   foot.textContent = isResult ? t.foot : "";
+  document.getElementById('logbtn').textContent = t.log;
   document.body.style.background = isResult ? softTint(ranked()[0].m.color) : "";
   card.className = step===-1 ? 'card intro' : (isResult ? 'card result' : 'card');
   if(step===-1){ renderIntro(t); return; }
